@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="lib" path="lib/activation-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/aopalliance-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
+	<classpathentry kind="lib" path="lib/async-http-jbossweb-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/async-http-servlet-3.0-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/async-http-tomcat6-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/bcmail-jdk16-1.46.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk16-1.46.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/el-api-1.0.jar.NotRequired"/>
+	<classpathentry kind="lib" path="lib/FastInfoset-1.2.7.jar"/>
+	<classpathentry kind="lib" path="lib/guice-2.0.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-core-asl-1.9.9.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-jaxrs-1.9.9.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-mapper-asl-1.9.9.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-xc-1.9.9.jar"/>
+	<classpathentry kind="lib" path="lib/javassist-3.8.0.GA.jar"/>
+	<classpathentry kind="lib" path="lib/jaxb-api-2.2.3.jar"/>
+	<classpathentry kind="lib" path="lib/jaxb-impl-2.2.4.jar"/>
+	<classpathentry kind="lib" path="lib/jaxrs-api-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/jboss-common-core-2.2.14.GA.jar"/>
+	<classpathentry kind="lib" path="lib/jboss-el-1.0_02.CR4.jar"/>
+	<classpathentry kind="lib" path="lib/jboss-logging-spi-2.0.5.GA.jar"/>
+	<classpathentry kind="lib" path="lib/jboss-transaction-api-1.0.1.GA.jar"/>
+	<classpathentry kind="lib" path="lib/jbosscache-core-3.2.5.GA.jar"/>
+	<classpathentry kind="lib" path="lib/jcip-annotations-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jettison-1.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/jgroups-2.6.13.GA.jar"/>
+	<classpathentry kind="lib" path="lib/jsr250-api-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="lib/mail-1.4.4.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-20100527.jar"/>
+	<classpathentry kind="lib" path="lib/oauth-provider-20100527.jar"/>
+	<classpathentry kind="lib" path="lib/persistence-api-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-atom-provider-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-cache-core-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-cdi-2.3.6.Final.jar.NotRequired"/>
+	<classpathentry kind="lib" path="lib/resteasy-crypto-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-fastinfoset-provider-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-guice-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-jackson-provider-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-jaxb-provider-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-jaxrs-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-jettison-provider-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-jsapi-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-links-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-multipart-provider-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-oauth-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-spring-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/resteasy-yaml-provider-2.3.6.Final.jar"/>
+	<classpathentry kind="lib" path="lib/scannotation-1.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/snakeyaml-1.8.jar"/>
+	<classpathentry kind="lib" path="lib/spring-aop-3.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-asm-3.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-beans-3.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-context-3.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-context-support-3.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-core-3.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-expression-3.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-web-3.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/spring-webmvc-3.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/stax-api-1.0-2.jar"/>
+	<classpathentry kind="lib" path="libExtras/tomcat-juli.jar"/>
+	<classpathentry kind="lib" path="lib/joda-time-2.1.jar"/>
+	<classpathentry kind="lib" path="libExtras/tomcat-dbcp.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v7.0">
+		<attributes>
+			<attribute name="owner.project.facets" value="jst.web"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/apns-0.1.6.jar" sourcepath="/Users/webonline/.m2/repository/com/notnoop/apns/apns/0.1.6/apns-0.1.6-sources.jar"/>
+	<classpathentry kind="lib" path="lib/xdoclet-base-locale-1.2.1.jar"/>
+	<classpathentry kind="lib" path="libExtras/servlet-api.jar"/>
+	<classpathentry kind="lib" path="libExtras/enunciate-core-annotations-1.27.jar"/>
+	<classpathentry kind="lib" path="lib/tsalgo.jar" sourcepath="/algo"/>
+	<classpathentry kind="lib" path="lib/tsdbconnection.jar"/>
+	<classpathentry kind="lib" path="lib/tsutils.jar"/>
+	<classpathentry kind="lib" path="lib/json-20090211.jar"/>
+	<classpathentry kind="lib" path="/Users/webonline/git/p6spy_config/p6spy-2.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/tsoauth.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.8.jar"/>
+	<classpathentry kind="var" path="TOMCAT_HOME/lib/mysql-connector-java-5.1.27-bin.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>
