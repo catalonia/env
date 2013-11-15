@@ -1,0 +1,164 @@
+<project name="RESTeasyWSImplementation" basedir="." default="createWar">
+    <property environment="env" />
+    <property name="build.dir" value="build" />
+    <property name="debuglevel" value="source,lines,vars" />
+    <property name="debug" value="on" />
+    <property name="optimize" value="false" />
+    <property name="target" value="1.6" />
+    <property name="source" value="1.6" />
+    <property name="dist" value="dist" />
+    <property name="docsfolder" value="docs" />
+    <property name="temp" value="${dist}/temp" />
+    <property name="server.jar" value="RESTeasyWSImplementation.jar" />
+    <property name="PROJECT_WS_NAME" value="tsws" />
+    <property name="filename.war" value="${PROJECT_WS_NAME}.war" />
+    <path id="webAppLibrary.classpath">
+        <fileset dir="${basedir}/lib">
+            <include name="*.jar" />
+        </fileset>
+        <fileset dir="${basedir}/libExtras">
+            <include name="*.jar" />
+        </fileset>
+    </path>
+    <path id="enunciate.classpath">
+        <fileset dir="${env.ENUNCIATE_HOME}/lib">
+            <include name="*.jar" />
+        </fileset> <!--include (optional) spring module -->
+        <fileset dir="${env.ENUNCIATE_HOME}/lib/modules/spring">
+            <include name="*.jar" />
+        </fileset>
+        <fileset dir="${java.home}">
+            <include name="lib/tools.jar" />
+        </fileset>
+        <path refid="webAppLibrary.classpath" />
+    </path>
+    <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
+        <classpath refid="enunciate.classpath" />
+    </taskdef>
+    <path id="RESTeasyWSImplementation.classpath">
+        <pathelement location="build/classes" />
+        <path refid="webAppLibrary.classpath" />
+        <!-- <path refid="EAR Libraries.libraryclasspath"/> -->
+    </path>
+    <target name="init">
+        <mkdir dir="${build.dir}/classes" />
+        <copy includeemptydirs="false" todir="${build.dir}/classes">
+            <fileset dir="src">
+                <exclude name="**/*.java" />
+            </fileset>
+        </copy>
+        <mkdir dir="${dist}" />
+        <mkdir dir="${temp}" />
+        <copy toDir="${temp}">
+            <!-- <fileset dir="webapp"> -->
+            <fileset dir="WebContent">
+                <include name="**/**" />
+                <exclude name="**/web.xml" />
+            </fileset>
+        </copy>
+    </target>
+    <target depends="init" name="compileProject">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${build.dir}/classes" />
+        <mkdir dir="${build.dir}/resources" />
+        <!--First let's compile the classes -->
+        <echo message="${ant.project.name}: ${ant.file}" />
+        <javac optimize="${optimize}" debug="${debug}" debuglevel="${debuglevel}"
+            failonerror="true" verbose="false" deprecation="on"
+            destdir="build/classes" source="${source}" target="${target}">
+            <src path="src" />
+            <classpath refid="RESTeasyWSImplementation.classpath" />
+        </javac>
+    </target>
+    <target name="serverJar" depends="compileProject">
+        <jar destfile="${build.dir}/${server.jar}">
+            <fileset dir="${build.dir}/classes">
+                <include name="**/*.class" />
+                <exclude name="**/test/*.class" />
+            </fileset>
+        </jar>
+        <copy toDir="${dist}">
+            <fileset dir="${build.dir}">
+                <include name="${server.jar}" />
+            </fileset>
+        </copy>
+        <copy toDir="${temp}/WEB-INF/lib">
+            <fileset dir="${build.dir}">
+                <include name="${server.jar}" />
+            </fileset>
+        </copy>
+        <!-- <delete dir="${build.dir}/${server.jar}" /> -->
+    </target>
+    <target depends="init" name="prepare.repo">
+        <!-- Copying the axis2 repository from ../repository -->
+        <copy toDir="${temp}/WEB-INF/lib">
+            <fileset dir="lib">
+                <include name="**/**" />
+            </fileset>
+        </copy>
+    </target>
+    <target depends="clean,init,prepare.repo,serverJar,enundocs" name="createWar">
+        <!--<target depends="init,prepare.repo,serverJar,enundocs" name="createWar"> -->
+        <!-- <war destfile="${dist}/${filename.war}" webxml="webapp/WEB-INF/web.xml"> -->
+        <war destfile="${dist}/${filename.war}" webxml="WebContent/WEB-INF/web.xml">
+            <lib dir="lib">
+                <!-- <include name="**" /> -->
+                <include name="**/*.jar" />
+                <exclude name="*.orig" />
+            </lib>
+            <webinf dir="${temp}/WEB-INF" />
+            <fileset dir="${temp}">
+                <include name="**/**" />
+                <exclude name="**/web.xml" />
+            </fileset>
+        </war>
+        <delete dir="${temp}" />
+    </target>
+    <target name="deployWar">
+        <delete dir="${env.TOMCAT_HOME}/webapps/${PROJECT_WS_NAME}" />
+        <copy toDir="${env.TOMCAT_HOME}/webapps">
+            <fileset dir="dist">
+                <include name="${filename.war}" />
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="${build.dir}" />
+	<echo message="starting target clean"/>
+	<antcall target="clean_classes"/>
+	<echo message="...finished target clean."/>
+    </target>
+  <target name="clean_classes">
+	<echo message="starting target clean_classes"/>
+	<mkdir dir="${build.dir}/classes"/>
+	<delete>
+	    <fileset dir="${build.dir}/classes" includes="**/*.class"/>
+	</delete>
+	<echo message="...finished target clean_classes."/>
+  </target>
+  
+    <target name="enundocs" description="Run enunicate task on the rest services">
+        <enunciate basedir="${basedir}/src">
+            <include name="**/*.java" />
+            <classpath refid="enunciate.classpath" />
+            <export artifactId="docs" destination="${docsfolder}/" />
+            <javacArgument argument="-g" />
+        </enunciate>
+    </target>
+    <target name="version">
+        <echo message="Java Version=${ant.java.version}" />
+        <echo message="Java Version=${java.vendor.url}" />
+        <echo message="Java Version=${java.vendor}" />
+        <echo message="Java Version=${java.home}" />
+        <echo message="Java Version=${java.vm.name}" />
+        <echo message="Java Version=${java.vm.version}" />
+    </target>
+    <target name="targets">
+        <echo> ANT build targets for the project => ${PROJECT_WS_NAME}
+            The following targets are available: - init ................
+            - prepare ................ - repo ................ -
+            serverJar ................ - createWar ................ -
+            deployWar ................
+        </echo>
+    </target>
+</project>
