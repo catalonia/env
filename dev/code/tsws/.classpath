@@ -12,7 +12,6 @@
 	<classpathentry kind="lib" path="lib/bcmail-jdk16-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk16-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
-	<classpathentry kind="lib" path="lib/el-api-1.0.jar.NotRequired"/>
 	<classpathentry kind="lib" path="lib/FastInfoset-1.2.7.jar"/>
 	<classpathentry kind="lib" path="lib/guice-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient-4.1.2.jar"/>
@@ -41,7 +40,6 @@
 	<classpathentry kind="lib" path="lib/persistence-api-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/resteasy-atom-provider-2.3.6.Final.jar"/>
 	<classpathentry kind="lib" path="lib/resteasy-cache-core-2.3.6.Final.jar"/>
-	<classpathentry kind="lib" path="lib/resteasy-cdi-2.3.6.Final.jar.NotRequired"/>
 	<classpathentry kind="lib" path="lib/resteasy-crypto-2.3.6.Final.jar"/>
 	<classpathentry kind="lib" path="lib/resteasy-fastinfoset-provider-2.3.6.Final.jar"/>
 	<classpathentry kind="lib" path="lib/resteasy-guice-2.3.6.Final.jar"/>
