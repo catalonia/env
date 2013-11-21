@@ -4,8 +4,21 @@
         no limit. maxIdle: Maximum number of idle dB connections to retain in pool. 
         Set to -1 for no limit. maxWait: Maximum milliseconds to wait for a dB connection 
         to become available Set to -1 to wait indefinitely. -->
-     <Resource name="jdbc/TastesyncDB" auth="Container" type="javax.sql.DataSource" 
+    <!-- <Resource name="jdbc/TastesyncDB" auth="Container" type="javax.sql.DataSource" 
         maxActive="100" maxIdle="30" maxWait="10000" removeAbandoned="true" username="myuser" 
         password="xxxx" driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://localhost:3306/tastesync" 
-        />
+        /> -->
+    <!--
+    <Resource name="jdbc/TastesyncDB" auth="Container"
+        type="javax.sql.DataSource" maxActive="100" maxIdle="30"
+        maxWait="10000" removeAbandoned="true" username="root" password=""
+        driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://localhost:3306/Delta3_3May2013" />
+    -->
+    
+    <Resource name="jdbc/TastesyncDB" auth="Container"
+        type="javax.sql.DataSource" maxActive="100" maxIdle="30"
+        maxWait="10000" removeAbandoned="true" removeAbandonedTimeout="300" logAbandoned="true" username="root" password=""
+        driverClassName="com.p6spy.engine.spy.P6SpyDriver" url="jdbc:mysql://localhost:3306/Delta3_3May2013?generateSimpleParameterMetadata=true" />
+    
+        
 </Context>

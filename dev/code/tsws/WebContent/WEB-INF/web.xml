@@ -39,8 +39,18 @@
     </servlet-mapping>
     <error-page>
         <error-code>404</error-code>
-        <location>/errors/error.jsp</location>
+        <location>/errors/error_404.jsp</location>
     </error-page>
+     <error-page>
+        <error-code>415</error-code>
+        <location>/errors/error_415.jsp</location>
+    </error-page>
+    <!-- 
+    <error-page>
+        <error-code>500</error-code>
+        <location>/errors/error_500.jsp</location>
+    </error-page>
+    -->
     <resource-ref>
         <description>DB Connection Pool</description>
         <res-ref-name>jdbc/TastesyncDB</res-ref-name>
