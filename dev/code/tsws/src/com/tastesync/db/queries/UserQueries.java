@@ -63,20 +63,19 @@ public interface UserQueries extends TSDBCommonQueries {
         " users.CURRENT_STATUS," + " users.USER_FB_ID" + " FROM " + " users " +
         " WHERE TS_USER_EMAIL = ? " + "AND TS_USER_PW = ?";
     public static String USER_ONLINE_UPDATE_SQL = "UPDATE users " +
-        "SET IS_ONLINE = ? " + "WHERE USER_ID = ?";
+        "SET IS_ONLINE, IS_ONLINE_UPDATED_DATETIME = ? " + "WHERE USER_ID = ?";
     public static String USER_STATUS_SELECT_SQL = "SELECT * FROM users WHERE USER_ID = ? AND CURRENT_STATUS = ?";
     public static String USER_CHECK_EMAIL_SELECT_SQL = "SELECT * FROM users WHERE TS_USER_EMAIL = ?";
     public static String USER_CHECK_EMAIL_STATUS_SELECT_SQL = "SELECT users.USER_ID, " +
-            "users.TS_USER_ID, " + "users.TS_USER_EMAIL, " +
-            "users.TS_FIRST_NAME, " + "users.TS_LAST_NAME, " +
-            "users.MAX_INVITES, " + "users.USER_CREATED_INITIAL_DATETIME, " +
-            "users.USER_POINTS, " + "users.TWITTER_USR_URL, " +
-            "users.USER_DISABLED_FLAG, " + "users.USER_ACTIVATION_KEY, " +
-            "users.USER_GENDER, " + "users.USER_CITY_ID, " + "users.USER_STATE, " +
-            "users.IS_ONLINE, " + "users.USER_COUNTRY, " +
-            "users.CURRENT_STATUS, " + "users.ABOUT, " + "users.USER_FB_ID " +
-    		"FROM users WHERE TS_USER_EMAIL = ? " +
-        "AND CURRENT_STATUS = ?";
+        "users.TS_USER_ID, " + "users.TS_USER_EMAIL, " +
+        "users.TS_FIRST_NAME, " + "users.TS_LAST_NAME, " +
+        "users.MAX_INVITES, " + "users.USER_CREATED_INITIAL_DATETIME, " +
+        "users.USER_POINTS, " + "users.TWITTER_USR_URL, " +
+        "users.USER_DISABLED_FLAG, " + "users.USER_ACTIVATION_KEY, " +
+        "users.USER_GENDER, " + "users.USER_CITY_ID, " + "users.USER_STATE, " +
+        "users.IS_ONLINE, " + "users.USER_COUNTRY, " +
+        "users.CURRENT_STATUS, " + "users.ABOUT, " + "users.USER_FB_ID " +
+        "FROM users WHERE TS_USER_EMAIL = ? " + "AND CURRENT_STATUS = ?";
     public static String USER_FBID_SELECT_SQL = "SELECT * FROM users WHERE User_FB_ID = ? AND CURRENT_STATUS = ?";
     public static String USER_FBID_UPDATE_SQL = "UPDATE users SET USER_FB_ID = ? WHERE USER_ID = ?";
     public static String USERID_SELECT_SQL = "SELECT * FROM facebook_user_data WHERE USER_FB_ID IN (SELECT USER_FB_ID FROM users WHERE USER_ID = ?)";
@@ -287,14 +286,13 @@ public interface UserQueries extends TSDBCommonQueries {
 
     // USER_HOME_PROFILE
     public static String USERS_FACEBOOK_USER_DATA_CITIES_SELECT_SQL = "SELECT" +
-            " cities.city_id, " + " cities.state, " + " users.USER_ID, " +
-            " facebook_user_data.NAME, facebook_user_data.PICTURE, " +
-            " facebook_user_data.LINK, users.TWITTER_USR_URL, users.Blog_Url, " +
-            " cities.city, users.USER_POINTS, users.ABOUT" +
-            " FROM users, facebook_user_data, cities" +
-            " WHERE users.USER_FB_ID = FACEBOOK_USER_DATA.User_FB_ID" +
-            " AND users.USER_CITY_ID = cities.city_id" +
-            " AND users.USER_ID = ?";
+        " cities.city_id, " + " cities.state, " + " users.USER_ID, " +
+        " facebook_user_data.NAME, facebook_user_data.PICTURE, " +
+        " facebook_user_data.LINK, users.TWITTER_USR_URL, users.Blog_Url, " +
+        " cities.city, users.USER_POINTS, users.ABOUT" +
+        " FROM users, facebook_user_data, cities" +
+        " WHERE users.USER_FB_ID = FACEBOOK_USER_DATA.User_FB_ID" +
+        " AND users.USER_CITY_ID = cities.city_id" + " AND users.USER_ID = ?";
 
     // USER_RESTAURANT_FAV
     public static String USER_RESTAURANT_FAV_SELECT_SQL = "SELECT * " +
@@ -383,8 +381,6 @@ public interface UserQueries extends TSDBCommonQueries {
         "VALUES (?,?,?,?)";
     public static String USER_DEVICE_SELECT_SQL = "SELECT * FROM `user_device` " +
         "WHERE USER_ID=?";
-
-
     public static String INIT_USER_USNC_INSERT_SQL = "" +
         "INSERT INTO USER_USNC " + " (USER_USNC.USER_ID, " +
         " USER_USNC.USNC_ID, " + " USER_USNC.USNC_YN) " + "VALUES ( ?, " +

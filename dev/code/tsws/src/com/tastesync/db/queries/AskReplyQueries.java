@@ -1,8 +1,6 @@
 package com.tastesync.db.queries;
 
-
-//public interface AskReplyQueries extends TSDBCommonQueries {
-public interface AskReplyQueries {
+public interface AskReplyQueries extends TSDBCommonQueries {
     public static final String RECOREQUEST_USER_INSERT_SQL = "insert into recorequest_user (" +
         "recorequest_user.RECOREQUEST_ID," +
         "recorequest_user.INITIATOR_USER_ID," +
@@ -84,10 +82,12 @@ public interface AskReplyQueries {
         "             recorequest_ts_assigned.assigned_user_id, " +
         "             recorequest_ts_assigned.assigned_user_registered_yn, " +
         "             recorequest_ts_assigned.recorequest_id, " +
-        "             recorequest_ts_assigned.algo1_ind) " +
+        "             recorequest_ts_assigned.algo1_ind,  " +
+        "             recorequest_ts_assigned.assigned_datetime ) " +
         "VALUES      ( ?, " + "              ?, " + "              ?, " +
         "              ?, " + "              ?, " + "              ?, " +
-        "              ? )";
+        "              ?, " + "? ) " + "ON DUPLICATE KEY UPDATE  " +
+        "recorequest_ts_assigned.RECOREQUEST_ID=recorequest_ts_assigned.RECOREQUEST_ID";
     public static final String CHECK_FB_USER_AS_TS_USER_SELECT_SQL = "" +
         "SELECT users.user_fb_id " + "FROM   users " +
         "WHERE  users.user_fb_id = ?";
@@ -192,14 +192,16 @@ public interface AskReplyQueries {
         "FROM   recorequest_reply_user " +
         "WHERE  recorequest_reply_user.RECOREQUEST_ID = ? ";
     public static String RECOREQUEST_REPLY_USER_RECO_REST_SELECT_SQL = "" +
-        "SELECT y.restaurant_id, " + "       y.recommender_user_id, " +
+        "SELECT y.restaurant_id, " + "       x.reply_user_id, " +
         "       x.reply_text " +
         "FROM   (SELECT recorequest_reply_user.reply_id, " +
-        "               recorequest_reply_user.reply_text " +
+        "               recorequest_reply_user.reply_text, " +
+        "               reply_user_id " +
         "        FROM   recorequest_reply_user " +
-        "        WHERE  recorequest_reply_user.recorequest_id = ?) x, " +
-        "       user_restaurant_reco y " + "WHERE  x.reply_id = y.reply_id " +
-        "       order by y.UPDATED_DATETIME ASC";
+        "        WHERE  recorequest_reply_user.recorequest_id = ?) x " +
+        "       LEFT OUTER JOIN user_restaurant_reco y " +
+        "                    ON x.reply_id = y.reply_id " +
+        "ORDER  BY y.updated_datetime ASC";
     public static String USER_RESTAURANT_INSERT_SQL = "" +
         "INSERT INTO user_restaurant_reco " +
         "            (user_restaurant_reco.recommendee_user_id, " +
@@ -397,20 +399,20 @@ public interface AskReplyQueries {
         "UPDATE RECOREPLY_DIDYOULIKE_NOTIF " +
         "SET    RECOREPLY_DIDYOULIKE_NOTIF.NOTIF_VIEWED = 1 " +
         "WHERE  RECOREPLY_DIDYOULIKE_NOTIF.RECOREQUEST_ID = ? ";
-    public static String COUNT_UNREAD_NOTIFICATIONS_ALL_SELECT_SQL = ""
-    + "SELECT Count(*) "
-    + "FROM   NOTIFICATIONS_ALL "
-    + "WHERE  NOTIFICATIONS_ALL.USER_ID = ? "
-    + "       AND  ( Isnull(NOTIFICATIONS_ALL.NOTIFICATION_VIEWED) = 1 "
-    + "       OR NOTIFICATIONS_ALL.NOTIFICATION_VIEWED = 0 ) ";
-    public static String CUISINE_TIER2_DESCRIPTOR_SEARCH_RESULTS_SELECT_SQL = ""
-    + "SELECT CUISINE_TIER2_DESCRIPTOR.CUISINE_DESC "
-    + "FROM   RESTAURANT_CUISINE, "
-    + "       CUISINE_TIER2_DESCRIPTOR "
-    + "WHERE  RESTAURANT_CUISINE.TIER2_CUISINE_ID IN ( 1_REPLACE_PARAM ) "
-    + "       AND RESTAURANT_CUISINE.RESTAURANT_ID =? "
-    + "       AND RESTAURANT_CUISINE.TIER2_CUISINE_ID = "
-    + "           CUISINE_TIER2_DESCRIPTOR.CUISINE_ID "
-    + "LIMIT  1 ";
-    
+    public static String COUNT_UNREAD_NOTIFICATIONS_ALL_SELECT_SQL = "" +
+        "SELECT Count(*) " + "FROM   NOTIFICATIONS_ALL " +
+        "WHERE  NOTIFICATIONS_ALL.USER_ID = ? " +
+        "       AND  ( Isnull(NOTIFICATIONS_ALL.NOTIFICATION_VIEWED) = 1 " +
+        "       OR NOTIFICATIONS_ALL.NOTIFICATION_VIEWED = 0 ) ";
+    public static String CUISINE_TIER2_DESCRIPTOR_SEARCH_RESULTS_SELECT_SQL = "" +
+        "SELECT CUISINE_TIER2_DESCRIPTOR.CUISINE_DESC " +
+        "FROM   RESTAURANT_CUISINE, " + "       CUISINE_TIER2_DESCRIPTOR " +
+        "WHERE  RESTAURANT_CUISINE.TIER2_CUISINE_ID IN ( 1_REPLACE_PARAM ) " +
+        "       AND RESTAURANT_CUISINE.RESTAURANT_ID =? " +
+        "       AND RESTAURANT_CUISINE.TIER2_CUISINE_ID = " +
+        "           CUISINE_TIER2_DESCRIPTOR.CUISINE_ID " + "LIMIT  1 ";
+    public static String RECOREQUEST_USER_INITIATOR_USER_ID_SELECT_SQL = "" +
+        "SELECT RECOREQUEST_USER.INITIATOR_USER_ID " +
+        "FROM   RECOREQUEST_USER " +
+        "WHERE  RECOREQUEST_USER.RECOREQUEST_ID = ? ";
 }

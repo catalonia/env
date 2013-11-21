@@ -1,8 +1,6 @@
 package com.tastesync.db.queries;
 
-
-//public interface RestaurantQueries extends TSDBCommonQueries {
-public interface RestaurantQueries {
+public interface RestaurantQueries extends TSDBCommonQueries {
     //selectRestaurants
     public static final String RESTAURANT_SELECT_SQL = "SELECT " +
         "restaurant.RESTAURANT_ID, " + "restaurant.FACTUAL_ID, " +
