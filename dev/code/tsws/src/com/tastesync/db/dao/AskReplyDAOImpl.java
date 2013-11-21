@@ -1448,7 +1448,7 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                                 "restaurant_id"));
 
                     recommenderUserId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                                "recommender_user_id"));
+                                "reply_user_id"));
 
                     replyText = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                                 "reply_text"));
@@ -2367,7 +2367,7 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                             "restaurant_id"));
 
                 recommenderUserId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "recommender_user_id"));
+                            "reply_user_id"));
 
                 replyText = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "reply_text"));
@@ -2941,8 +2941,12 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
 
                     resultset = statement.executeQuery();
 
-                    String friendTrustedFlag = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                                "user_friend_tastesync.FRIEND_TRUSTED_FLAG"));
+                    String friendTrustedFlag = null;
+
+                    if (resultset.next()) {
+                        friendTrustedFlag = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                                    "user_friend_tastesync.FRIEND_TRUSTED_FLAG"));
+                    }
 
                     statement.close();
 
@@ -3275,6 +3279,139 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
 
             throw new TasteSyncException(
                 "Error while submitAskForRecommendationSearch " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
+        }
+    }
+
+    @Override
+    public void submitAskForRecommendationTsContact(TSDataSource tsDataSource,
+        Connection connection, String recorequestId, String assignedUserId)
+        throws TasteSyncException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(AskReplyQueries.RECOREQUEST_USER_INITIATOR_USER_ID_SELECT_SQL);
+            statement.setString(1, recorequestId);
+            resultset = statement.executeQuery();
+
+            String recoInitiatorUserId = null;
+
+            if (resultset.next()) {
+                recoInitiatorUserId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "RECOREQUEST_USER.INITIATOR_USER_ID"));
+            } else {
+                throw new TasteSyncException(
+                    "Unknown recoInitiatorUserId for recorequestId=" +
+                    recorequestId);
+            }
+
+            statement = connection.prepareStatement(TSDBCommonQueries.FRIEND_TRUSTED_FLAG_SELECT_SQL);
+            statement.setString(1, recoInitiatorUserId);
+            statement.setString(2, assignedUserId);
+
+            resultset = statement.executeQuery();
+
+            String friendTrustedFlag = null;
+            String friendFlag = null;
+
+            if (resultset.next()) {
+                friendTrustedFlag = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "user_friend_tastesync.FRIEND_TRUSTED_FLAG"));
+            }
+
+            if ("0".equals(friendTrustedFlag) || "1".equals(friendTrustedFlag)) {
+                friendFlag = "1";
+            }
+
+            statement = connection.prepareStatement(TSDBCommonQueries.COUNT_RECOREQUEST_USER_FOLLOWEEFLAG_SELECT_SQL);
+            statement.setString(1, assignedUserId);
+            statement.setString(2, recoInitiatorUserId);
+
+            resultset = statement.executeQuery();
+
+            String followeeFlag = "0"; // default
+
+            int rowCount = 0;
+
+            if (resultset.next()) {
+                rowCount = resultset.getInt(1);
+            }
+
+            if (rowCount > 0) {
+                followeeFlag = "1";
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(TSDBCommonQueries.COUNT_RECOREQUEST_USER_FOLLOWEEFLAG_SELECT_SQL);
+            statement.setString(1, recoInitiatorUserId);
+            statement.setString(2, assignedUserId);
+
+            resultset = statement.executeQuery();
+
+            String followerFlag = "0"; // default
+
+            rowCount = 0;
+
+            if (resultset.next()) {
+                rowCount = resultset.getInt(1);
+            }
+
+            if (rowCount > 0) {
+                followerFlag = "1";
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(AskReplyQueries.RECOREQUEST_TS_ASSIGNED_INSERT_SQL);
+
+            String assignedUsertype = null;
+
+            if ("1".equals(friendFlag)) {
+                assignedUsertype = "user-assigned-friend";
+            } else {
+                if ("1".equals(followeeFlag)) {
+                    assignedUsertype = "user-assigned-followee";
+                } else {
+                    if ("1".equals(followerFlag)) {
+                        assignedUsertype = "user-assigned-follower";
+                    }
+                }
+            }
+
+            if (assignedUsertype == null) {
+                assignedUsertype = "user-assigned-other";
+            }
+
+            statement.setString(1, "N");
+            statement.setString(2, "1".equals(friendTrustedFlag) ? "Y" : "N");
+            statement.setString(3, "user-assigned-friend");
+            statement.setString(4, assignedUserId);
+            statement.setString(5, "Y");
+            statement.setString(6, recorequestId);
+            statement.setInt(7, 1);
+            statement.setTimestamp(8,
+                CommonFunctionsUtil.getCurrentDateTimestamp());
+            statement.executeUpdate();
+
+            statement.close();
+            tsDataSource.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+
+            throw new TasteSyncException(
+                "Error while submitAskForRecommendationTsContact " +
                 e.getMessage());
         } finally {
             tsDataSource.closeConnection(statement, resultset);

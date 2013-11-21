@@ -1981,7 +1981,8 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
             //Update IS_ONLINE status 
             statement = connection.prepareStatement(UserQueries.USER_ONLINE_UPDATE_SQL);
             statement.setString(1, status);
-            statement.setString(2, userId);
+            statement.setTimestamp(2, CommonFunctionsUtil.getCurrentDateTimestamp());
+            statement.setString(3, userId);
             statement.executeUpdate();
             statement.close();
 

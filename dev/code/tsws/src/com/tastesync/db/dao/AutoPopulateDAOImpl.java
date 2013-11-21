@@ -9,6 +9,8 @@ import com.tastesync.exception.TasteSyncException;
 
 import com.tastesync.model.objects.TSCityObj;
 import com.tastesync.model.objects.TSCuisineTier2Obj;
+import com.tastesync.model.objects.TSInitDataObj;
+import com.tastesync.model.objects.TSInitDescriptorDataObj;
 import com.tastesync.model.objects.TSLocationSearchCitiesObj;
 import com.tastesync.model.objects.TSRestaurantBasicObj;
 import com.tastesync.model.objects.TSRestaurantObj;
@@ -24,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -597,6 +600,191 @@ public class AutoPopulateDAOImpl extends BaseDaoImpl implements AutoPopulateDAO 
             e.printStackTrace();
             throw new TasteSyncException(e.getMessage());
         } catch (JSONException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
+        }
+    }
+
+    @Override
+    public TSInitDataObj showInitData(TSDataSource tsDataSource,
+        Connection connection) throws TasteSyncException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            statement = connection.prepareStatement(AutoPopulateQueries.CUISINE_TIER1_SELECT_SQL);
+            resultset = statement.executeQuery();
+
+            List<TSInitDescriptorDataObj> cuisine1List = new ArrayList<TSInitDescriptorDataObj>();
+
+            while (resultset.next()) {
+                TSInitDescriptorDataObj cuisine1Desc = new TSInitDescriptorDataObj();
+                cuisine1Desc.setId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "cuisine_tier1_descriptor.CUISINE_ID")));
+                cuisine1Desc.setName(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "cuisine_tier1_descriptor.CUISINE_DESC")));
+                cuisine1Desc.setType("cuisine1");
+                cuisine1List.add(cuisine1Desc);
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(AutoPopulateQueries.CUISINE_TIER2_SELECT_SQL);
+            resultset = statement.executeQuery();
+
+            List<TSInitDescriptorDataObj> cuisine2List = new ArrayList<TSInitDescriptorDataObj>();
+
+            while (resultset.next()) {
+                TSInitDescriptorDataObj cuisine2Desc = new TSInitDescriptorDataObj();
+                cuisine2Desc.setId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "cuisine_tier2_descriptor.CUISINE_ID")));
+                cuisine2Desc.setName(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "cuisine_tier2_descriptor.CUISINE_DESC")));
+                cuisine2Desc.setType("cuisine2");
+                cuisine2List.add(cuisine2Desc);
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(AutoPopulateQueries.PRICE_SELECT_SQL);
+            resultset = statement.executeQuery();
+
+            List<TSInitDescriptorDataObj> priceList = new ArrayList<TSInitDescriptorDataObj>();
+
+            while (resultset.next()) {
+                TSInitDescriptorDataObj price = new TSInitDescriptorDataObj();
+                price.setId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("price_descriptor.price_ID")));
+                price.setName(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("price_descriptor.price_DESC")));
+                price.setTilePicture(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("price_descriptor.tile_picture")));
+                price.setType("price");
+                priceList.add(price);
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(AutoPopulateQueries.WHOAREYOUWITH_SELECT_SQL);
+            resultset = statement.executeQuery();
+
+            List<TSInitDescriptorDataObj> whoareyouList = new ArrayList<TSInitDescriptorDataObj>();
+
+            while (resultset.next()) {
+                TSInitDescriptorDataObj whoareyou = new TSInitDescriptorDataObj();
+                whoareyou.setId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "whoareyouwith_descriptor.whoareyouwith_ID")));
+                whoareyou.setName(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "whoareyouwith_descriptor.whoareyouwith_DESC")));
+                whoareyou.setTilePicture(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "whoareyouwith_descriptor.tile_picture")));
+
+                whoareyou.setType("whoareyou");
+                whoareyouList.add(whoareyou);
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(AutoPopulateQueries.OCCASION_SELECT_SQL);
+            resultset = statement.executeQuery();
+
+            List<TSInitDescriptorDataObj> ambienceList = new ArrayList<TSInitDescriptorDataObj>();
+
+            while (resultset.next()) {
+                TSInitDescriptorDataObj occasion = new TSInitDescriptorDataObj();
+                occasion.setId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("occasion_descriptor.Occasion_ID")));
+                occasion.setName(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("occasion_descriptor.Occasion_DESC")));
+                occasion.setTilePicture(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("occasion_descriptor.tile_picture")));
+
+                String order = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "occasion_descriptor.ambience_order"));
+
+                if ((order != null) && !order.isEmpty()) {
+                    occasion.setOrder(Integer.valueOf(order));
+                }
+
+                occasion.setType("occasion");
+                ambienceList.add(occasion);
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(AutoPopulateQueries.THEME_SELECT_SQL);
+            resultset = statement.executeQuery();
+
+            while (resultset.next()) {
+                TSInitDescriptorDataObj theme = new TSInitDescriptorDataObj();
+                theme.setId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("theme_descriptor.theme_ID")));
+                theme.setName(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("theme_descriptor.theme_DESC")));
+                theme.setTilePicture(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("theme_descriptor.tile_picture")));
+
+                String order = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "theme_descriptor.ambience_order"));
+
+                if ((order != null) && !order.isEmpty()) {
+                    theme.setOrder(Integer.valueOf(order));
+                }
+
+                theme.setType("theme");
+                ambienceList.add(theme);
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(AutoPopulateQueries.TYPEOFREST_SELECT_SQL);
+            resultset = statement.executeQuery();
+
+            while (resultset.next()) {
+                TSInitDescriptorDataObj typeOfRest = new TSInitDescriptorDataObj();
+                typeOfRest.setId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "typeofrest_descriptor.typeofrest_ID")));
+                typeOfRest.setName(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "typeofrest_descriptor.typeofrest_DESC")));
+                typeOfRest.setTilePicture(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "typeofrest_descriptor.tile_picture")));
+
+                String order = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "typeofrest_descriptor.ambience_order"));
+
+                if ((order != null) && !order.isEmpty()) {
+                    typeOfRest.setOrder(Integer.valueOf(order));
+                }
+
+                typeOfRest.setType("typeOfRest");
+                ambienceList.add(typeOfRest);
+            }
+
+            statement.close();
+            Collections.sort(ambienceList,
+                new TSInitDescriptorDataObj().new TSInitDataObjComparator());
+
+            TSInitDataObj tsInitDataObj = new TSInitDataObj();
+            tsInitDataObj.setCuisine1(cuisine1List);
+            tsInitDataObj.setCuisine2(cuisine2List);
+            tsInitDataObj.setPrice(priceList);
+            tsInitDataObj.setWhoAreYou(whoareyouList);
+            tsInitDataObj.setAmbience(ambienceList);
+
+            return tsInitDataObj;
+        } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(e.getMessage());
         } finally {

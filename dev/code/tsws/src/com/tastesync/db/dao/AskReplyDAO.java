@@ -18,7 +18,6 @@ import java.sql.Connection;
 
 import java.util.List;
 
-
 public interface AskReplyDAO {
     String showAskForRecommendationFriends(TSDataSource tsDataSource,
         Connection connection, String recoRequestId) throws TasteSyncException;
@@ -74,6 +73,10 @@ public interface AskReplyDAO {
         String[] themeIdList, String[] whoareyouwithIdList,
         String[] typeOfRestaurantIdList, String[] occasionIdList,
         String neighborhoodId, String cityId, String stateName)
+        throws TasteSyncException;
+
+    void submitAskForRecommendationTsContact(TSDataSource tsDataSource,
+        Connection connection, String recorequestId, String assignedUserId)
         throws TasteSyncException;
 
     void submitRecommendationDidYouLikeLikes(TSDataSource tsDataSource,

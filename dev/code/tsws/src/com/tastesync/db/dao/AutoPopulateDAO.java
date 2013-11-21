@@ -4,6 +4,7 @@ import com.tastesync.db.pool.TSDataSource;
 
 import com.tastesync.exception.TasteSyncException;
 
+import com.tastesync.model.objects.TSInitDataObj;
 import com.tastesync.model.objects.TSLocationSearchCitiesObj;
 import com.tastesync.model.objects.TSRestaurantBasicObj;
 import com.tastesync.model.objects.TSRestaurantObj;
@@ -53,4 +54,7 @@ public interface AutoPopulateDAO {
 
     JSONArray populateWhoareyouwithDescriptor(TSDataSource tsDataSource,
         Connection connection) throws TasteSyncException;
+    TSInitDataObj showInitData(TSDataSource tsDataSource,
+            Connection connection) throws TasteSyncException;
+
 }
