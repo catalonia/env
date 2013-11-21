@@ -10,6 +10,8 @@ import com.tastesync.db.pool.TSDataSource;
 import com.tastesync.exception.TasteSyncException;
 
 import com.tastesync.model.objects.TSErrorObj;
+import com.tastesync.model.objects.TSInitDataObj;
+import com.tastesync.model.objects.TSInitObj;
 import com.tastesync.model.objects.TSLocationSearchCitiesObj;
 import com.tastesync.model.objects.TSRestaurantBasicObj;
 import com.tastesync.model.objects.TSRestaurantObj;
@@ -1005,4 +1007,81 @@ public class AutoPopulateService extends BaseService {
             } // end if
         } // end finally
     } // end populateWhoareyouwithDescriptor()
+    /**
+     * DOCUMENT ME!
+     *
+     * @param headers DOCUMENT ME!
+     *
+     * @return DOCUMENT ME!
+     */
+    @POST
+    @Path("/initdata")
+    @org.codehaus.enunciate.jaxrs.TypeHint(TSInitDataObj.class)
+    @Consumes({MediaType.APPLICATION_FORM_URLENCODED
+    })
+    @Produces({MediaType.APPLICATION_JSON
+    })
+    public Response showInitData(@Context
+    HttpHeaders headers) {
+        super.processHttpHeaders(headers);
+    
+        TSInitDataObj tsInitDataObj = null;
+        int status = TSResponseStatusCode.SUCCESS.getValue();
+        boolean responseDone = false;
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+        Connection connection = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsInitDataObj = autoPopulateBO.showInitData(tsDataSource, connection);
+            responseDone = true;
+
+            String identifierForVendor = headers.getRequestHeader(
+                    "identifierForVendor").get(0);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug(
+                    "showInitData(HttpHeaders) - identifierForVendor=" +
+                    identifierForVendor);
+            }
+
+            return Response.status(status).entity(tsInitDataObj).build();
+        } // end try
+        catch (TasteSyncException e) {
+            logger.error(e);
+            status = TSResponseStatusCode.ERROR.getValue();
+
+            TSErrorObj tsErrorObj = new TSErrorObj();
+
+            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+            responseDone = true;
+
+            return Response.status(status).entity(tsErrorObj).build();
+        } // end catch
+        catch (SQLException e) {
+            logger.error(e);
+            status = TSResponseStatusCode.ERROR.getValue();
+
+            TSErrorObj tsErrorObj = new TSErrorObj();
+
+            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+            responseDone = true;
+
+            return Response.status(status).entity(tsErrorObj).build();
+        } // end catch
+        finally {
+            tsDataSource.closeConnection(connection);
+
+            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
+                if (!responseDone) {
+                    status = TSResponseStatusCode.ERROR.getValue();
+
+                    TSErrorObj tsErrorObj = new TSErrorObj();
+                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
+
+                    return Response.status(status).entity(tsErrorObj).build();
+                } // end if
+            } // end if
+        } // end finally
+    }
 } // end AutoPopulateService

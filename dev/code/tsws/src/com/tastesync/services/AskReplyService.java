@@ -1145,7 +1145,7 @@ public class AskReplyService extends BaseService {
     })
     @Produces({MediaType.APPLICATION_JSON
     })
-    public Response submitAskForRecommendationFriends(
+    private Response submitAskForRecommendationFriends(
         @Context
     HttpHeaders headers, @FormParam("userid")
     String userId, @FormParam("recorequestid")
@@ -1917,4 +1917,109 @@ public class AskReplyService extends BaseService {
             } // end if
         } // end finally
     } // end submitRecommendationRequestAnswer()
+    
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @param headers DOCUMENT ME!
+     * @param recorequestId DOCUMENT ME!
+     * @param assignedUserId DOCUMENT ME!
+     *
+     * @return DOCUMENT ME!
+     */
+    @POST
+    @Path("/recoreqtscontact")
+    @org.codehaus.enunciate.jaxrs.TypeHint(TSSuccessObj.class)
+    @Consumes({MediaType.APPLICATION_FORM_URLENCODED
+    })
+    @Produces({MediaType.APPLICATION_JSON
+    })
+    public Response submitAskForRecommendationTsContact(
+        @Context
+    HttpHeaders headers, @FormParam("recorequestid")
+    String recorequestId,
+        @FormParam("assigneduserid")
+    String assignedUserId) {
+        super.processHttpHeaders(headers);
+
+        int status = TSResponseStatusCode.SUCCESS.getValue();
+
+        boolean responseDone = false;
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+        Connection connection = null;
+
+        // BO - DO- DBQuery
+        try {
+            //parameters check
+            recorequestId = CommonFunctionsUtil.converStringAsNullIfNeeded(recorequestId);
+            assignedUserId = CommonFunctionsUtil.converStringAsNullIfNeeded(assignedUserId);
+
+            connection = tsDataSource.getConnection();
+
+            String oauthUserId = null;
+
+            if (TSConstants.OAUTH_SWTICHED_ON) {
+                HeaderDataVO headerDataVO = headerOauthDataChecks(headers);
+
+                if (headerDataVO == null) {
+                    return notAuthorised();
+                } // end if
+
+                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                        connection, headerDataVO.getIdentifierForVendor(),
+                        headerDataVO.getInputOauthToken());
+
+                if (oauthDataVO == null) {
+                    return notAuthorised();
+                } // end if
+
+                oauthUserId = oauthDataVO.getUserId();
+            } // end if
+
+            askReplyBO.submitAskForRecommendationTsContact(tsDataSource,
+                connection, recorequestId, assignedUserId);
+
+            TSSuccessObj tsSuccessObj = new TSSuccessObj();
+            responseDone = true;
+            return Response.status(status).entity(tsSuccessObj).build();
+        } // end try
+        catch (TasteSyncException e) {
+            logger.error(e);
+            status = TSResponseStatusCode.ERROR.getValue();
+
+            TSErrorObj tsErrorObj = new TSErrorObj();
+            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+            responseDone = true;
+
+            return Response.status(status).entity(tsErrorObj).build();
+        } // end catch
+        catch (SQLException e) {
+            logger.error(e);
+            status = TSResponseStatusCode.ERROR.getValue();
+
+            TSErrorObj tsErrorObj = new TSErrorObj();
+            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+            responseDone = true;
+
+            return Response.status(status).entity(tsErrorObj).build();
+        } // end catch
+        finally {
+            tsDataSource.closeConnection(connection);
+
+            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
+                if (!responseDone) {
+                    status = TSResponseStatusCode.ERROR.getValue();
+
+                    TSErrorObj tsErrorObj = new TSErrorObj();
+                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
+
+                    return Response.status(status).entity(tsErrorObj).build();
+                } // end if
+            } // end if
+        } // end finally
+        
+    }
+    
+    
 } // end AskReplyService
