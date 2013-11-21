@@ -134,6 +134,14 @@ public class AskReplyBOImpl implements AskReplyBO {
     }
 
     @Override
+    public void submitAskForRecommendationTsContact(TSDataSource tsDataSource,
+        Connection connection, String recorequestId, String assignedUserId)
+        throws TasteSyncException {
+        askReplyDAO.submitAskForRecommendationTsContact(tsDataSource,
+            connection, recorequestId, assignedUserId);
+    }
+
+    @Override
     public void submitRecommendationDidYouLikeLikes(TSDataSource tsDataSource,
         Connection connection, String userId, String restaurantId,
         String likeFlag) throws TasteSyncException {

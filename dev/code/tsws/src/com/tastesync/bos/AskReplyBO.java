@@ -76,6 +76,10 @@ public interface AskReplyBO {
         String neighborhoodId, String cityId, String stateName)
         throws TasteSyncException;
 
+    void submitAskForRecommendationTsContact(TSDataSource tsDataSource,
+        Connection connection, String recorequestId, String assignedUserId)
+        throws TasteSyncException;
+
     void submitRecommendationDidYouLikeLikes(TSDataSource tsDataSource,
         Connection connection, String userId, String restaurantId,
         String likeFlag) throws TasteSyncException;
