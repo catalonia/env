@@ -289,5 +289,24 @@ public class TSFacebookUserDataObj implements Serializable {
 		public void setCreate(String create) {
 			this.create = create;
 		}
+
+		@Override
+		public String toString() {
+			return "TSFacebookUserDataObj [userName=" + userName + ", id=" + id
+					+ ", name=" + name + ", firstName=" + firstName
+					+ ", middleName=" + middleName + ", lastName=" + lastName
+					+ ", gender=" + gender + ", locale=" + locale + ", link="
+					+ link + ", ageRange=" + ageRange + ", birthday="
+					+ birthday + ", thirdPartyId=" + thirdPartyId
+					+ ", friendlists=" + friendlists + ", installed="
+					+ installed + ", timezone=" + timezone + ", updatedTime="
+					+ updatedTime + ", verified=" + verified + ", devices="
+					+ devices + ", email=" + email + ", hometown=" + hometown
+					+ ", location=" + location + ", picture=" + picture
+					+ ", relationshipStatus=" + relationshipStatus
+					+ ", checkins=" + checkins + ", friends=" + friends
+					+ ", likes=" + likes + ", permissions=" + permissions
+					+ ", create=" + create + "]";
+		}
 	
 }

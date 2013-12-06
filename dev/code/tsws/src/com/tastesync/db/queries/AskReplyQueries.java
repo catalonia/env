@@ -57,7 +57,7 @@ public interface AskReplyQueries extends TSDBCommonQueries {
         "            (user_reco_demand_tier_precalc.calc_flag, " +
         "             user_reco_demand_tier_precalc.demand_tier_precalc, " +
         "             user_reco_demand_tier_precalc.user_id) " +
-        "VALUES      ( 1, " + "              0, " + "              ? )" +
+        "VALUES      ( ?, " + "              ?, " + "              ? )" +
         "ON DUPLICATE KEY UPDATE " +
         "user_reco_demand_tier_precalc.demand_tier_precalc = user_reco_demand_tier_precalc.demand_tier_precalc, " +
         "user_reco_demand_tier_precalc.calc_flag = 1 ";
@@ -342,9 +342,8 @@ public interface AskReplyQueries extends TSDBCommonQueries {
         "FROM   recoreply_didyoulike_notif " +
         "WHERE  recoreply_didyoulike_notif.recorequest_id = ? ";
     public static String COUNT_NOTIFICATIONS_ALL_SELECT_SQL = "" +
-        "SELECT notifications_all.notification_type, " +
-        "       notifications_all.linked_id, " +
-        "       notifications_all.datetime " + "FROM   notifications_all " +
+        "SELECT COUNT(*) " +
+        "       FROM   notifications_all " +
         "WHERE  notifications_all.user_id = ? ";
     public static String NOTIFICATIONS_ALL_SELECT_SQL = "" +
         "SELECT notifications_all.notification_type, " +

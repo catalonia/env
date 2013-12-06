@@ -9,7 +9,7 @@ import com.tastesync.model.vo.HeaderDataVO;
 
 import com.tastesync.oauth.bos.OAuthBO;
 import com.tastesync.oauth.bos.OAuthBOImpl;
-import com.tastesync.oauth.model.vo.OAuthDataVO;
+import com.tastesync.oauth.model.vo.OAuthDataExtInfoVO;
 
 import com.tastesync.util.TSConstants;
 import com.tastesync.util.TSResponseStatusCode;
@@ -110,7 +110,7 @@ public abstract class BaseService {
      *
      * @throws TasteSyncException DOCUMENT ME!
      */
-    public OAuthDataVO getUserOAuthDataFrmDBBasedOnFromOAuthToken(
+    public OAuthDataExtInfoVO getUserOAuthDataFrmDBBasedOnFromOAuthToken(
         TSDataSource tsDataSource, Connection connection,
         String identifierForVendor, String inputOauthToken)
         throws TasteSyncException {
@@ -221,8 +221,52 @@ public abstract class BaseService {
         tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
 
         return Response.status(status).header("ts_oauth_token", "invalid")
-                       .header("ts_oauth_msg",
-            "Some error occurred. Please log in.").entity(tsErrorObj).build();
+                       .header("ts_oauth_token_msg",
+            OAuthDataExtInfoVO.OAUTH_ERROR_CODE_DEFAULT_MSG)
+                       .header("ts_oauth_token_msg_code",
+            String.valueOf(OAuthDataExtInfoVO.OAUTH_ERROR_CODE_DEFAULT))
+                       .entity(tsErrorObj).build();
+    } // end notAuthorised()
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param oauthDataExtInfoVO DOCUMENT ME!
+     *
+     * @return DOCUMENT ME!
+     */
+    public Response notAuthorised(OAuthDataExtInfoVO oauthDataExtInfoVO) {
+        int status = TSResponseStatusCode.ERROR_UNAUTHORIZED.getValue();
+
+        TSErrorObj tsErrorObj = new TSErrorObj();
+        tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+
+        String tsOAuthMsg = OAuthDataExtInfoVO.OAUTH_ERROR_CODE_DEFAULT_MSG;
+        String tsOAuthMsgcode = String.valueOf(OAuthDataExtInfoVO.OAUTH_ERROR_CODE_DEFAULT);
+
+        if (oauthDataExtInfoVO == null) {
+            tsOAuthMsgcode = String.valueOf(OAuthDataExtInfoVO.OAUTH_ERROR_CODE_UNKNOWN_USER_LOGIN);
+            tsOAuthMsg = OAuthDataExtInfoVO.OAUTH_ERROR_CODE_UNKNOWN_USER_LOGIN_MSG;
+        } else if (oauthDataExtInfoVO.getOauthDataVO() == null) {
+            int oauthErrorCode = oauthDataExtInfoVO.getOauthErrorCode();
+            tsOAuthMsgcode = String.valueOf(oauthErrorCode);
+            //overwrite default msg
+            tsOAuthMsg = oauthDataExtInfoVO.getDefaultOauthErrorCodeMsg();
+
+            if (oauthErrorCode == OAuthDataExtInfoVO.OAUTH_ERROR_CODE_UNKNOWN_USER_LOGIN) {
+                tsOAuthMsgcode = String.valueOf(oauthErrorCode);
+                tsOAuthMsg = oauthDataExtInfoVO.getDefaultOauthErrorCodeMsg();
+            } else if (oauthErrorCode == OAuthDataExtInfoVO.OAUTH_ERROR_CODE_USER_PROFILE_NOT_COMPLETED) {
+                tsOAuthMsgcode = String.valueOf(oauthErrorCode);
+                //overwrite default msg
+                tsOAuthMsg = oauthDataExtInfoVO.getDefaultOauthErrorCodeMsg();
+            }
+        }
+
+        return Response.status(status).header("ts_oauth_token", "invalid")
+                       .header("ts_oauth_token_msg", tsOAuthMsg)
+                       .header("ts_oauth_token_msg_code", tsOAuthMsgcode)
+                       .entity(tsErrorObj).build();
     } // end notAuthorised()
 
     /**

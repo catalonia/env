@@ -741,6 +741,7 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
             statement = connection.prepareStatement(UserQueries.USER_CHECK_EMAIL_STATUS_SELECT_SQL);
             statement.setString(1, email);
             statement.setString(2, String.valueOf("e"));
+            statement.setString(3, String.valueOf("p"));
             resultset = statement.executeQuery();
 
             if (resultset.next()) {
@@ -1292,7 +1293,9 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
             if (tsUserObj != null) {
                 statement = connection.prepareStatement(UserQueries.USER_ONLINE_UPDATE_SQL);
                 statement.setString(1, "Y");
-                statement.setString(2, tsUserObj.getUserId());
+                statement.setTimestamp(2,
+                    CommonFunctionsUtil.getCurrentDateTimestamp());
+                statement.setString(3, tsUserObj.getUserId());
                 statement.executeUpdate();
                 statement.close();
 
@@ -1633,7 +1636,9 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
 
                             statement = connection.prepareStatement(UserQueries.USER_ONLINE_UPDATE_SQL);
                             statement.setString(1, String.valueOf("y"));
-                            statement.setString(2, user.getUserId());
+                            statement.setTimestamp(2,
+                                CommonFunctionsUtil.getCurrentDateTimestamp());
+                            statement.setString(3, user.getUserId());
                             statement.executeUpdate();
                             statement.close();
                         }
@@ -1789,7 +1794,7 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
                                 user_current_profile.getEmail());
                         response = new UserResponse();
 
-                        if (check_user) {
+                        if (check_user && "e".equals(user.getCurrentStatus())) {
                             response.setIs_have_account("1");
                         } else {
                             response.setIs_have_account("0");
@@ -1843,7 +1848,9 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
                 //Update IS_ONLINE status 
                 statement = connection.prepareStatement(UserQueries.USER_ONLINE_UPDATE_SQL);
                 statement.setString(1, String.valueOf("n"));
-                statement.setString(2, userId);
+                statement.setTimestamp(2,
+                    CommonFunctionsUtil.getCurrentDateTimestamp());
+                statement.setString(3, userId);
                 statement.executeUpdate();
                 statement.close();
 
@@ -1981,7 +1988,8 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
             //Update IS_ONLINE status 
             statement = connection.prepareStatement(UserQueries.USER_ONLINE_UPDATE_SQL);
             statement.setString(1, status);
-            statement.setTimestamp(2, CommonFunctionsUtil.getCurrentDateTimestamp());
+            statement.setTimestamp(2,
+                CommonFunctionsUtil.getCurrentDateTimestamp());
             statement.setString(3, userId);
             statement.executeUpdate();
             statement.close();
@@ -2676,11 +2684,10 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
                 statement.close();
 
                 if ((cuisineTier2Desc != null) && !cuisineTier2Desc.isEmpty()) {
-                    statement = connection.prepareStatement(UserQueries.USERS_ABOUT_INSERT_SQL);
-
-                    statement.setString(1, askObj.getUserId());
-                    statement.setString(2,
+                    statement = connection.prepareStatement(UserQueries.USERS_ABOUT_UPDATE_SQL);
+                    statement.setString(1,
                         "Favorite Cuisine: " + cuisineTier2Desc);
+                    statement.setString(2, askObj.getUserId());
                     statement.execute();
                     statement.close();
                 }
@@ -2706,6 +2713,15 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
             }
 
             statement.close();
+
+            statement = connection.prepareStatement(UserQueries.USERS_CURRENT_STATUS_UPDATE_SQL);
+
+            statement.setString(1, "e");
+            statement.setString(2, askObj.getUserId());
+            statement.execute();
+
+            statement.close();
+
             tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();

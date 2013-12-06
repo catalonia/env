@@ -762,6 +762,7 @@ public class MySQL {
             statement = connection.prepareStatement(UserQueries.USER_CHECK_EMAIL_STATUS_SELECT_SQL);
             statement.setString(1, email);
             statement.setString(2, String.valueOf("e"));
+            statement.setString(3, String.valueOf("p"));
 
             ResultSet resultset = statement.executeQuery();
 

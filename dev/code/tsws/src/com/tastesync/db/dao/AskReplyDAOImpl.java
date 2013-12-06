@@ -841,6 +841,8 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                 tsNotifDidYouLikeObj.setMaxPaginationId(String.valueOf(
                         tsRecoNotificationBaseObjElement.getMaxPaginationId()));
 
+                tsNotifDidYouLikeObj.setUnreadCounter(tsRecoNotificationBaseObjElement.getUnreadCounter());
+
                 String datetime = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "recoreply_didyoulike_notif.notif_datetime"));
 
@@ -951,6 +953,7 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                 tsNotifFollowupQuestionObj.setRecoNotificationType(TSConstants.RECONOTIFICATION_TYPE_FOLLOWUP);
                 tsNotifFollowupQuestionObj.setMaxPaginationId(String.valueOf(
                         tsRecoNotificationBaseObjElement.getMaxPaginationId()));
+                tsNotifFollowupQuestionObj.setUnreadCounter(tsRecoNotificationBaseObjElement.getUnreadCounter());
 
                 String assignedDatetime = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "restaurant_question_ts_assigned.assigned_datetime"));
@@ -964,6 +967,8 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                 tsNotifFollowupQuestionObj.setViewed(CommonFunctionsUtil.getModifiedValueString(
                         resultset.getString(
                             "restaurant_question_ts_assigned.question_assigned_viewed")));
+
+                tsNotifFollowupQuestionObj.setUnreadCounter(tsRecoNotificationBaseObjElement.getUnreadCounter());
 
                 statementInner = connection.prepareStatement(AskReplyQueries.COUNT_QUESTION_REPLY_USER_SELECT_SQL);
                 tsNotifFollowupQuestionObj.setActioned("0");
@@ -1098,6 +1103,7 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                 tsNotifMessageForYouObj.setRecoNotificationType(TSConstants.RECONOTIFICATION_TYPE_MESSAGE);
                 tsNotifMessageForYouObj.setMaxPaginationId(String.valueOf(
                         tsRecoNotificationBaseObjElement.getMaxPaginationId()));
+                tsNotifMessageForYouObj.setUnreadCounter(tsRecoNotificationBaseObjElement.getUnreadCounter());
 
                 String messageCreatedTime = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "user_message.created"));
@@ -1111,6 +1117,8 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                 tsNotifMessageForYouObj.setViewed(CommonFunctionsUtil.getModifiedValueString(
                         resultset.getString(
                             "user_message.message_recipient_viewed")));
+
+                tsNotifMessageForYouObj.setUnreadCounter(tsRecoNotificationBaseObjElement.getUnreadCounter());
 
                 statementInner = connection.prepareStatement(AskReplyQueries.COUNT_USER_MESSAGE_SELECT_SQL);
                 tsNotifMessageForYouObj.setActioned("0");
@@ -1241,6 +1249,7 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                 tsNotifRecoLikeObj.setRecoNotificationType(TSConstants.RECONOTIFICATION_TYPE_LIKE);
                 tsNotifRecoLikeObj.setMaxPaginationId(String.valueOf(
                         tsRecoNotificationBaseObjElement.getMaxPaginationId()));
+                tsNotifRecoLikeObj.setUnreadCounter(tsRecoNotificationBaseObjElement.getUnreadCounter());
 
                 String likeDatetime = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "reco_like.like_datetime"));
@@ -1357,6 +1366,8 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                 tsNotifRecorequestAnswerObj.setIdBase(recorequestIdElement);
 
                 tsNotifRecorequestAnswerObj.setRecoNotificationType(TSConstants.RECONOTIFICATION_TYPE_ANSWER);
+
+                tsNotifRecorequestAnswerObj.setUnreadCounter(tsRecoNotificationBaseObjElement.getUnreadCounter());
 
                 tsNotifRecorequestAnswerObj.setMaxPaginationId(String.valueOf(
                         tsRecoNotificationBaseObjElement.getMaxPaginationId()));
@@ -1585,6 +1596,8 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
 
                 tsNotifRecorequestNeededObj.setMaxPaginationId(String.valueOf(
                         tsRecoNotificationBaseObjElement.getMaxPaginationId()));
+
+                tsNotifRecorequestNeededObj.setUnreadCounter(tsRecoNotificationBaseObjElement.getUnreadCounter());
 
                 tsNotifRecorequestNeededObjList.add(tsNotifRecorequestNeededObj);
             }
@@ -2027,6 +2040,22 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
 
         try {
             tsDataSource.begin();
+            
+            statement = connection.prepareStatement(AskReplyQueries.RECOREQUEST_USER_INITIATOR_USER_ID_SELECT_SQL);
+            statement.setString(1, recorequestId);
+            resultset = statement.executeQuery();
+
+            String recoInitiatorUserId = null;
+
+            if (resultset.next()) {
+                recoInitiatorUserId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "RECOREQUEST_USER.INITIATOR_USER_ID"));
+            } else {
+                throw new TasteSyncException(
+                    "Unknown recoInitiatorUserId for recorequestId=" +
+                    recorequestId);
+            }
+            
             statement = connection.prepareStatement(AskReplyQueries.RECOREQUEST_RESTAURANT_SELECT_SQL);
             statement.setString(1, recorequestId);
             resultset = statement.executeQuery();
@@ -2043,10 +2072,12 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                     recommendedrestaurantsRestaurantName = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant.restaurant_name"));
                 }
-
+                String unreadCounter = getUnreadCounterNotificationsAll(connection,
+                		recoInitiatorUserId);
                 TSRestaurantBasicObj tsRestaurantBasicObj = new TSRestaurantBasicObj();
                 tsRestaurantBasicObj.setRestaurantId(recommendedrestaurantsRestaurantId);
                 tsRestaurantBasicObj.setRestaurantName(recommendedrestaurantsRestaurantName);
+                tsRestaurantBasicObj.setUnreadCounter(unreadCounter);
                 tsRestaurantObjList.add(tsRestaurantBasicObj);
             }
 
@@ -3246,9 +3277,13 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
             statement.executeUpdate();
 
             statement.close();
-
+            // additonal check LOCK_WAIT error persists?
+            tsDataSource.commit();
+            tsDataSource.begin();
             statement = connection.prepareStatement(AskReplyQueries.USER_RECO_DEMAND_TIER_INSERT_SQL);
-            statement.setString(1, userId);
+            statement.setInt(1, 1);
+            statement.setInt(2, 0);
+            statement.setString(3, userId);
             statement.executeUpdate();
 
             statement.close();

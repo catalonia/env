@@ -23,7 +23,7 @@ import com.tastesync.model.objects.derived.TSRestaurantsTileSearchExtendedInfoOb
 import com.tastesync.model.objects.derived.TSSenderUserObj;
 import com.tastesync.model.vo.HeaderDataVO;
 
-import com.tastesync.oauth.model.vo.OAuthDataVO;
+import com.tastesync.oauth.model.vo.OAuthDataExtInfoVO;
 
 import com.tastesync.util.TSConstants;
 import com.tastesync.util.TSResponseStatusCode;
@@ -91,9 +91,6 @@ public class AskReplyService extends BaseService {
     String recoRequestId) {
         super.processHttpHeaders(headers);
 
-        boolean responseDone = false;
-
-        int status = TSResponseStatusCode.SUCCESS.getValue();
         recoRequestId = CommonFunctionsUtil.converStringAsNullIfNeeded(recoRequestId);
 
         TSDataSource tsDataSource = TSDataSource.getInstance();
@@ -112,15 +109,17 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
@@ -128,51 +127,36 @@ public class AskReplyService extends BaseService {
             String recoRequestText = askReplyBO.showAskForRecommendationFriends(tsDataSource,
                     connection, recoRequestId);
 
-            responseDone = true;
-
             TSKeyValueObj tsKeyValueObj = new TSKeyValueObj();
             tsKeyValueObj.setKeyName(TSKeyValueObj.KEY);
             tsKeyValueObj.setKeyNameValue("recorequesttext");
 
             tsKeyValueObj.setValueName(TSKeyValueObj.VALUE);
             tsKeyValueObj.setValueNameValue(recoRequestText);
-            responseDone = true;
 
-            return Response.status(status).entity(tsKeyValueObj).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsKeyValueObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end showAskForRecommendationFriends()
 
@@ -222,7 +206,6 @@ public class AskReplyService extends BaseService {
     String paginationId) {
         super.processHttpHeaders(headers);
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
         //To Be removed!!
         userId = CommonFunctionsUtil.converStringAsNullIfNeeded(userId);
         restaurantId = CommonFunctionsUtil.converStringAsNullIfNeeded(restaurantId);
@@ -258,7 +241,6 @@ public class AskReplyService extends BaseService {
         chainFlag = CommonFunctionsUtil.converStringAsNullIfNeeded(chainFlag);
         paginationId = CommonFunctionsUtil.converStringAsNullIfNeeded(paginationId);
 
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -274,15 +256,17 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
@@ -295,45 +279,31 @@ public class AskReplyService extends BaseService {
                     CommonFunctionsUtil.convertStringListAsArrayList(
                         priceIdList), rating, savedFlag, favFlag, dealFlag,
                     chainFlag, paginationId);
-            responseDone = true;
 
-            return Response.status(status)
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
                            .entity(tsRestaurantsTileSearchExtendedInfoObj)
                            .build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end showListOfRestaurantsSearchResults()
 
@@ -362,13 +332,10 @@ public class AskReplyService extends BaseService {
     String paginationId) {
         super.processHttpHeaders(headers);
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-
         userId = CommonFunctionsUtil.converStringAsNullIfNeeded(userId);
         recoRequestId = CommonFunctionsUtil.converStringAsNullIfNeeded(recoRequestId);
         paginationId = CommonFunctionsUtil.converStringAsNullIfNeeded(paginationId);
 
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -384,60 +351,48 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
             TSRestaurantsTileSearchExtendedInfoObj tsRestaurantsTileSearchExtendedInfoObj =
                 askReplyBO.showListOfRestaurantsSearchResultsBasedOnRecoId(tsDataSource,
                     connection, userId, recoRequestId, paginationId);
-            responseDone = true;
 
-            return Response.status(status)
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
                            .entity(tsRestaurantsTileSearchExtendedInfoObj)
                            .build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end showListOfRestaurantsSearchResultsBasedOnRecoId()
 
@@ -461,10 +416,8 @@ public class AskReplyService extends BaseService {
     String recorequestId) {
         super.processHttpHeaders(headers);
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
         recorequestId = CommonFunctionsUtil.converStringAsNullIfNeeded(recorequestId);
 
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -481,57 +434,46 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
             List<TSRestaurantBasicObj> tsRestaurantObjList = askReplyBO.showRecommendationDidYouLike(tsDataSource,
                     connection, recorequestId);
-            responseDone = true;
 
-            return Response.status(status).entity(tsRestaurantObjList).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsRestaurantObjList).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end showRecommendationDidYouLike()
 
@@ -557,11 +499,9 @@ public class AskReplyService extends BaseService {
     String recipientUserId) {
         super.processHttpHeaders(headers);
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
         messageId = CommonFunctionsUtil.converStringAsNullIfNeeded(messageId);
         recipientUserId = CommonFunctionsUtil.converStringAsNullIfNeeded(recipientUserId);
 
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -578,57 +518,46 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
             TSSenderUserObj tsSenderUserObj = askReplyBO.showRecommendationMessage(tsDataSource,
                     connection, messageId, recipientUserId);
-            responseDone = true;
 
-            return Response.status(status).entity(tsSenderUserObj).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsSenderUserObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end showRecommendationMessage()
 
@@ -654,11 +583,9 @@ public class AskReplyService extends BaseService {
     String questionId) {
         super.processHttpHeaders(headers);
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
         userId = CommonFunctionsUtil.converStringAsNullIfNeeded(userId);
         questionId = CommonFunctionsUtil.converStringAsNullIfNeeded(questionId);
 
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -674,58 +601,46 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
             TSRecommendationsFollowupObj tsRecommendationsFollowupObj = askReplyBO.showRecommendationsFollowup(tsDataSource,
                     connection, userId, questionId);
-            responseDone = true;
 
-            return Response.status(status).entity(tsRecommendationsFollowupObj)
-                           .build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsRecommendationsFollowupObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end showRecommendationsFollowup()
 
@@ -751,8 +666,6 @@ public class AskReplyService extends BaseService {
     String recorequestId) {
         super.processHttpHeaders(headers);
 
-        boolean responseDone = false;
-        int status = TSResponseStatusCode.SUCCESS.getValue();
         userId = CommonFunctionsUtil.converStringAsNullIfNeeded(userId);
         recorequestId = CommonFunctionsUtil.converStringAsNullIfNeeded(recorequestId);
 
@@ -771,58 +684,46 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
             TSRecommendationsForYouObj tsRecommendationsForYou = askReplyBO.showRecommendationsForYou(tsDataSource,
                     connection, userId, recorequestId);
-            responseDone = true;
 
-            return Response.status(status).entity(tsRecommendationsForYou)
-                           .build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsRecommendationsForYou).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end showRecommendationsForYou()
 
@@ -848,8 +749,6 @@ public class AskReplyService extends BaseService {
     String paginationId) {
         super.processHttpHeaders(headers);
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -869,58 +768,46 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
             List<TSRecoNotificationBaseObj> recoNotificationBase = askReplyBO.showRecommendationsList(tsDataSource,
                     connection, userId, paginationId);
 
-            responseDone = true;
-
-            return Response.status(status).entity(recoNotificationBase).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(recoNotificationBase).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end showRecommendationsList()
 
@@ -946,8 +833,6 @@ public class AskReplyService extends BaseService {
     String recorequestId) {
         super.processHttpHeaders(headers);
 
-        boolean responseDone = false;
-        int status = TSResponseStatusCode.SUCCESS.getValue();
         userId = CommonFunctionsUtil.converStringAsNullIfNeeded(userId);
         recorequestId = CommonFunctionsUtil.converStringAsNullIfNeeded(recorequestId);
 
@@ -966,15 +851,17 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
@@ -982,52 +869,36 @@ public class AskReplyService extends BaseService {
                     connection, userId, recorequestId);
 
             if (tsRecoRequestObj == null) {
-                status = TSResponseStatusCode.INVALIDDATA.getValue();
-
                 TSErrorObj tsErrorObj = new TSErrorObj();
                 tsErrorObj.setErrorMsg(TSConstants.ERROR_INVALID_INPUT_DATA_KEY);
-                responseDone = true;
 
-                return Response.status(status).entity(tsErrorObj).build();
+                return Response.status(TSResponseStatusCode.INVALIDDATA.getValue())
+                               .entity(tsErrorObj).build();
             } // end if
 
-            responseDone = true;
-
-            return Response.status(status).entity(tsRecoRequestObj).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsRecoRequestObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end showRecommendationsRequest()
 
@@ -1053,11 +924,9 @@ public class AskReplyService extends BaseService {
     String recommenderUserId) {
         super.processHttpHeaders(headers);
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
         recoLikeId = CommonFunctionsUtil.converStringAsNullIfNeeded(recoLikeId);
         recommenderUserId = CommonFunctionsUtil.converStringAsNullIfNeeded(recommenderUserId);
 
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -1074,55 +943,46 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
             TSRecommendeeUserObj tsRecommendeeUser = askReplyBO.showRecommendationsShowLikes(tsDataSource,
                     connection, recoLikeId, recommenderUserId);
-            responseDone = true;
 
-            return Response.status(status).entity(tsRecommendeeUser).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsRecommendeeUser).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end showRecommendationsShowLikes()
 
@@ -1166,9 +1026,6 @@ public class AskReplyService extends BaseService {
         //    	-- calculate1 Logic
 
         //parameters check
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -1190,15 +1047,17 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
@@ -1206,8 +1065,6 @@ public class AskReplyService extends BaseService {
                     connection, userId, recoRequestId, recoRequestFriendText,
                     CommonFunctionsUtil.convertStringListAsArrayList(
                         friendsFacebookIdList), postRecoRequestOnFacebook);
-
-            responseDone = true;
 
             try {
                 CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT,
@@ -1217,42 +1074,29 @@ public class AskReplyService extends BaseService {
                 logger.error(e);
             } // end catch
 
-            return Response.status(status).entity(tsRecoRequestNonAssignedObj)
-                           .build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsRecoRequestNonAssignedObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end submitAskForRecommendationFriends()
 
@@ -1301,9 +1145,6 @@ public class AskReplyService extends BaseService {
     String stateName) {
         super.processHttpHeaders(headers);
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -1323,13 +1164,10 @@ public class AskReplyService extends BaseService {
 
             // if cityId is null, error!
             if (cityId == null) {
-                status = TSResponseStatusCode.INVALIDDATA.getValue();
-
                 TSErrorObj tsErrorObj = new TSErrorObj();
                 tsErrorObj.setErrorMsg(TSConstants.ERROR_INVALID_INPUT_DATA_KEY);
-                responseDone = true;
 
-                return Response.status(status)
+                return Response.status(TSResponseStatusCode.INVALIDDATA.getValue())
                                .header("cityId", TSConstants.EMPTY)
                                .entity(tsErrorObj).build();
             } // end if
@@ -1345,15 +1183,17 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
@@ -1379,7 +1219,6 @@ public class AskReplyService extends BaseService {
             tsKeyValueObj.setKeyNameValue("recorequestid");
             tsKeyValueObj.setValueName(TSKeyValueObj.VALUE);
             tsKeyValueObj.setValueNameValue(recoRequestId);
-            responseDone = true;
 
             try {
                 CommonFunctionsUtil.execAsync(TSConstants.TRIGGER_ALGO1_SCRIPT +
@@ -1390,43 +1229,117 @@ public class AskReplyService extends BaseService {
                 logger.error(e);
             } // end catch
 
-            return Response.status(status).entity(tsKeyValueObj).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsKeyValueObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end submitAskForRecommendationSearch()
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param headers DOCUMENT ME!
+     * @param recorequestId DOCUMENT ME!
+     * @param assignedUserId DOCUMENT ME!
+     *
+     * @return DOCUMENT ME!
+     */
+    @POST
+    @Path("/recoreqtscontact")
+    @org.codehaus.enunciate.jaxrs.TypeHint(TSSuccessObj.class)
+    @Consumes({MediaType.APPLICATION_FORM_URLENCODED
+    })
+    @Produces({MediaType.APPLICATION_JSON
+    })
+    public Response submitAskForRecommendationTsContact(
+        @Context
+    HttpHeaders headers, @FormParam("recorequestid")
+    String recorequestId, @FormParam("assigneduserid")
+    String assignedUserId) {
+        super.processHttpHeaders(headers);
+
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+        Connection connection = null;
+
+        // BO - DO- DBQuery
+        try {
+            //parameters check
+            recorequestId = CommonFunctionsUtil.converStringAsNullIfNeeded(recorequestId);
+            assignedUserId = CommonFunctionsUtil.converStringAsNullIfNeeded(assignedUserId);
+
+            connection = tsDataSource.getConnection();
+
+            String oauthUserId = null;
+
+            if (TSConstants.OAUTH_SWTICHED_ON) {
+                HeaderDataVO headerDataVO = headerOauthDataChecks(headers);
+
+                if (headerDataVO == null) {
+                    return notAuthorised();
+                } // end if
+
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                        connection, headerDataVO.getIdentifierForVendor(),
+                        headerDataVO.getInputOauthToken());
+
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
+                } // end if
+
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+            } // end if
+
+            askReplyBO.submitAskForRecommendationTsContact(tsDataSource,
+                connection, recorequestId, assignedUserId);
+
+            TSSuccessObj tsSuccessObj = new TSSuccessObj();
+
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsSuccessObj).build();
+        } // end try
+        catch (TasteSyncException e) {
+            logger.error(e);
+
+            TSErrorObj tsErrorObj = new TSErrorObj();
+            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
+        } // end catch
+        catch (SQLException e) {
+            logger.error(e);
+
+            TSErrorObj tsErrorObj = new TSErrorObj();
+            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
+        } // end catch
+        finally {
+            tsDataSource.closeConnection(connection);
+        } // end finally
+    }
 
     /**
      * DOCUMENT ME!
@@ -1456,9 +1369,6 @@ public class AskReplyService extends BaseService {
         //Should be triggered on every like or Un-like click. Should update Faves list of the user
 
         //parameters check
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -1479,15 +1389,17 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
@@ -1495,7 +1407,6 @@ public class AskReplyService extends BaseService {
                 connection, userId, restaurantId, likeFlag);
 
             TSSuccessObj tsSuccessObj = new TSSuccessObj();
-            responseDone = true;
 
             try {
                 CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT,
@@ -1505,41 +1416,29 @@ public class AskReplyService extends BaseService {
                 logger.error(e);
             } // end catch
 
-            return Response.status(status).entity(tsSuccessObj).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsSuccessObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end submitRecommendationDidYouLikeLikes()
 
@@ -1570,9 +1469,6 @@ public class AskReplyService extends BaseService {
     String restaurantIdList) {
         super.processHttpHeaders(headers);
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -1594,15 +1490,17 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
@@ -1612,7 +1510,6 @@ public class AskReplyService extends BaseService {
                     restaurantIdList));
 
             TSSuccessObj tsSuccessObj = new TSSuccessObj();
-            responseDone = true;
 
             try {
                 CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT,
@@ -1622,41 +1519,29 @@ public class AskReplyService extends BaseService {
                 logger.error(e);
             } // end catch
 
-            return Response.status(status).entity(tsSuccessObj).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsSuccessObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end submitRecommendationFollowupAnswer()
 
@@ -1694,9 +1579,6 @@ public class AskReplyService extends BaseService {
         super.processHttpHeaders(headers);
 
         //parameters check
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -1708,11 +1590,8 @@ public class AskReplyService extends BaseService {
             newMessageSenderUserId = CommonFunctionsUtil.converStringAsNullIfNeeded(newMessageSenderUserId);
 
             if (newMessageRecipientUserId == null) {
-                status = TSResponseStatusCode.INVALIDDATA.getValue();
-
                 TSErrorObj tsErrorObj = new TSErrorObj();
                 tsErrorObj.setErrorMsg(TSConstants.ERROR_INVALID_INPUT_DATA_KEY);
-                responseDone = true;
 
                 try {
                     CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT,
@@ -1722,7 +1601,7 @@ public class AskReplyService extends BaseService {
                     logger.error(e);
                 } // end catch
 
-                return Response.status(status)
+                return Response.status(TSResponseStatusCode.INVALIDDATA.getValue())
                                .header("recipientyId", TSConstants.EMPTY)
                                .entity(tsErrorObj).build();
             } // end if
@@ -1739,15 +1618,17 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
@@ -1758,43 +1639,30 @@ public class AskReplyService extends BaseService {
                     restaurantIdList));
 
             TSSuccessObj tsSuccessObj = new TSSuccessObj();
-            responseDone = true;
 
-            return Response.status(status).entity(tsSuccessObj).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsSuccessObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end submitRecommendationMessageAnswer()
 
@@ -1827,9 +1695,6 @@ public class AskReplyService extends BaseService {
     String replyText) {
         super.processHttpHeaders(headers);
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -1852,15 +1717,17 @@ public class AskReplyService extends BaseService {
                     return notAuthorised();
                 } // end if
 
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
                         headerDataVO.getInputOauthToken());
 
-                if (oauthDataVO == null) {
-                    return notAuthorised();
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                oauthUserId = oauthDataVO.getUserId();
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+
                 userId = oauthUserId;
             } // end if
 
@@ -1870,7 +1737,6 @@ public class AskReplyService extends BaseService {
                     restaurantIdList), replyText);
 
             TSSuccessObj tsSuccessObj = new TSSuccessObj();
-            responseDone = true;
 
             try {
                 CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT,
@@ -1880,146 +1746,29 @@ public class AskReplyService extends BaseService {
                 logger.error(e);
             } // end catch
 
-            return Response.status(status).entity(tsSuccessObj).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsSuccessObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end submitRecommendationRequestAnswer()
-    
-    
-    /**
-     * DOCUMENT ME!
-     *
-     * @param headers DOCUMENT ME!
-     * @param recorequestId DOCUMENT ME!
-     * @param assignedUserId DOCUMENT ME!
-     *
-     * @return DOCUMENT ME!
-     */
-    @POST
-    @Path("/recoreqtscontact")
-    @org.codehaus.enunciate.jaxrs.TypeHint(TSSuccessObj.class)
-    @Consumes({MediaType.APPLICATION_FORM_URLENCODED
-    })
-    @Produces({MediaType.APPLICATION_JSON
-    })
-    public Response submitAskForRecommendationTsContact(
-        @Context
-    HttpHeaders headers, @FormParam("recorequestid")
-    String recorequestId,
-        @FormParam("assigneduserid")
-    String assignedUserId) {
-        super.processHttpHeaders(headers);
-
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-
-        boolean responseDone = false;
-        TSDataSource tsDataSource = TSDataSource.getInstance();
-        Connection connection = null;
-
-        // BO - DO- DBQuery
-        try {
-            //parameters check
-            recorequestId = CommonFunctionsUtil.converStringAsNullIfNeeded(recorequestId);
-            assignedUserId = CommonFunctionsUtil.converStringAsNullIfNeeded(assignedUserId);
-
-            connection = tsDataSource.getConnection();
-
-            String oauthUserId = null;
-
-            if (TSConstants.OAUTH_SWTICHED_ON) {
-                HeaderDataVO headerDataVO = headerOauthDataChecks(headers);
-
-                if (headerDataVO == null) {
-                    return notAuthorised();
-                } // end if
-
-                OAuthDataVO oauthDataVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
-                        connection, headerDataVO.getIdentifierForVendor(),
-                        headerDataVO.getInputOauthToken());
-
-                if (oauthDataVO == null) {
-                    return notAuthorised();
-                } // end if
-
-                oauthUserId = oauthDataVO.getUserId();
-            } // end if
-
-            askReplyBO.submitAskForRecommendationTsContact(tsDataSource,
-                connection, recorequestId, assignedUserId);
-
-            TSSuccessObj tsSuccessObj = new TSSuccessObj();
-            responseDone = true;
-            return Response.status(status).entity(tsSuccessObj).build();
-        } // end try
-        catch (TasteSyncException e) {
-            logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
-
-            TSErrorObj tsErrorObj = new TSErrorObj();
-            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
-
-            return Response.status(status).entity(tsErrorObj).build();
-        } // end catch
-        catch (SQLException e) {
-            logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
-
-            TSErrorObj tsErrorObj = new TSErrorObj();
-            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
-
-            return Response.status(status).entity(tsErrorObj).build();
-        } // end catch
-        finally {
-            tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
-        } // end finally
-        
-    }
-    
-    
 } // end AskReplyService

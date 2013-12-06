@@ -11,7 +11,6 @@ import com.tastesync.exception.TasteSyncException;
 
 import com.tastesync.model.objects.TSErrorObj;
 import com.tastesync.model.objects.TSInitDataObj;
-import com.tastesync.model.objects.TSInitObj;
 import com.tastesync.model.objects.TSLocationSearchCitiesObj;
 import com.tastesync.model.objects.TSRestaurantBasicObj;
 import com.tastesync.model.objects.TSRestaurantObj;
@@ -83,8 +82,7 @@ public class AutoPopulateService extends BaseService {
         super.processHttpHeaders(headers);
 
         JSONArray jsonArray = null;
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
+
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -93,45 +91,31 @@ public class AutoPopulateService extends BaseService {
             jsonArray = autoPopulateBO.populateCuisineTier1(tsDataSource,
                     connection);
 
-            responseDone = true;
-
-            return Response.status(status).entity(jsonArray.toString()).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(jsonArray.toString()).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateCuisineTier1()
 
@@ -154,8 +138,7 @@ public class AutoPopulateService extends BaseService {
         super.processHttpHeaders(headers);
 
         JSONArray jsonArray = null;
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
+
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -163,45 +146,32 @@ public class AutoPopulateService extends BaseService {
             connection = tsDataSource.getConnection();
             jsonArray = autoPopulateBO.populateCuisineTier2(tsDataSource,
                     connection);
-            responseDone = true;
 
-            return Response.status(status).entity(jsonArray.toString()).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(jsonArray.toString()).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateCuisineTier2()
 
@@ -226,8 +196,6 @@ public class AutoPopulateService extends BaseService {
 
         List<TSLocationSearchCitiesObj> tsLocationSearchCitiesObjList = null;
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -235,44 +203,30 @@ public class AutoPopulateService extends BaseService {
             connection = tsDataSource.getConnection();
             tsLocationSearchCitiesObjList = autoPopulateBO.populateLocationSearchTerms(tsDataSource,
                     connection);
-            responseDone = true;
 
-            return Response.status(status).entity(tsLocationSearchCitiesObjList)
-                           .build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsLocationSearchCitiesObjList).build();
         } // end try
         catch (TasteSyncException e1) {
             logger.error(e1);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateLocationSearchTerms()
 
@@ -300,8 +254,6 @@ public class AutoPopulateService extends BaseService {
 
         JSONArray jsonArray = null;
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -358,49 +310,31 @@ public class AutoPopulateService extends BaseService {
                 jsonArray.put(jsonArrayWhoareyouwithDescriptor);
             } // end if
 
-            responseDone = true;
-
-            return Response.status(status).entity(jsonArray.toString()).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(jsonArray.toString()).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status)
-                           .header(TSConstants.EX_CLASS,
-                e.getClass().getCanonicalName()).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status)
-                           .header(TSConstants.EX_CLASS,
-                e.getClass().getCanonicalName()).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateMoodSearchTerms()
 
@@ -423,8 +357,7 @@ public class AutoPopulateService extends BaseService {
         super.processHttpHeaders(headers);
 
         JSONArray jsonArray = null;
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
+
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -432,45 +365,32 @@ public class AutoPopulateService extends BaseService {
             connection = tsDataSource.getConnection();
             jsonArray = autoPopulateBO.populateOccasionDescriptor(tsDataSource,
                     connection);
-            responseDone = true;
 
-            return Response.status(status).entity(jsonArray.toString()).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(jsonArray.toString()).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error("populateOccasionDescriptor(HttpHeaders)", e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateOccasionDescriptor()
 
@@ -493,8 +413,7 @@ public class AutoPopulateService extends BaseService {
         super.processHttpHeaders(headers);
 
         JSONArray jsonArray = null;
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
+
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -502,45 +421,32 @@ public class AutoPopulateService extends BaseService {
             connection = tsDataSource.getConnection();
             jsonArray = autoPopulateBO.populatePriceDescriptor(tsDataSource,
                     connection);
-            responseDone = true;
 
-            return Response.status(status).entity(jsonArray.toString()).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(jsonArray.toString()).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populatePriceDescriptor()
 
@@ -569,8 +475,6 @@ public class AutoPopulateService extends BaseService {
 
         List<TSRestaurantObj> listRestaurant = null;
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -581,50 +485,35 @@ public class AutoPopulateService extends BaseService {
             connection = tsDataSource.getConnection();
             listRestaurant = autoPopulateBO.populateRestaurantSearchTerms(tsDataSource,
                     connection, key, cityId);
-            responseDone = true;
 
-            return Response.status(status).entity(listRestaurant).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(listRestaurant).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status)
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
                            .header(TSConstants.EX_CLASS,
                 e.getClass().getCanonicalName()).entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error("populateRestaurantSearchTerms(HttpHeaders, String, String)",
                 e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status)
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
                            .header(TSConstants.EX_CLASS,
                 e.getClass().getCanonicalName()).entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateRestaurantSearchTerms()
 
@@ -653,8 +542,6 @@ public class AutoPopulateService extends BaseService {
 
         List<TSRestaurantBasicObj> tsRestaurantBasicObjList = null;
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -665,50 +552,34 @@ public class AutoPopulateService extends BaseService {
             connection = tsDataSource.getConnection();
             tsRestaurantBasicObjList = autoPopulateBO.populateSuggestedRestaurantNames(tsDataSource,
                     connection, key, cityId);
-            responseDone = true;
 
-            return Response.status(status).entity(tsRestaurantBasicObjList)
-                           .build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsRestaurantBasicObjList).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status)
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
                            .header(TSConstants.EX_CLASS,
                 e.getClass().getCanonicalName()).entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status)
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
                            .header(TSConstants.EX_CLASS,
                 e.getClass().getCanonicalName()).entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateSuggestedRestaurantNames()
 
@@ -731,8 +602,7 @@ public class AutoPopulateService extends BaseService {
         super.processHttpHeaders(headers);
 
         JSONArray jsonArray = null;
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
+
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -740,45 +610,32 @@ public class AutoPopulateService extends BaseService {
             connection = tsDataSource.getConnection();
             jsonArray = autoPopulateBO.populateThemeDescriptor(tsDataSource,
                     connection);
-            responseDone = true;
 
-            return Response.status(status).entity(jsonArray.toString()).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(jsonArray.toString()).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateThemeDescriptor()
 
@@ -801,8 +658,7 @@ public class AutoPopulateService extends BaseService {
         super.processHttpHeaders(headers);
 
         JSONArray jsonArray = null;
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
+
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -810,45 +666,32 @@ public class AutoPopulateService extends BaseService {
             connection = tsDataSource.getConnection();
             jsonArray = autoPopulateBO.populateTypeofrestDescriptor(tsDataSource,
                     connection);
-            responseDone = true;
 
-            return Response.status(status).entity(jsonArray.toString()).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(jsonArray.toString()).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateTypeofrestDescriptor()
 
@@ -878,8 +721,6 @@ public class AutoPopulateService extends BaseService {
 
         List<TSUserProfileBasicObj> tsUserProfileBasicObjList = null;
 
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -891,50 +732,34 @@ public class AutoPopulateService extends BaseService {
             connection = tsDataSource.getConnection();
             tsUserProfileBasicObjList = autoPopulateBO.populateUserSearchTerms(tsDataSource,
                     connection, userId, key, excludeFollowees);
-            responseDone = true;
 
-            return Response.status(status).entity(tsUserProfileBasicObjList)
-                           .build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsUserProfileBasicObjList).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status)
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
                            .header(TSConstants.EX_CLASS,
                 e.getClass().getCanonicalName()).entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status)
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
                            .header(TSConstants.EX_CLASS,
                 e.getClass().getCanonicalName()).entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateUserSearchTerms()
 
@@ -957,8 +782,7 @@ public class AutoPopulateService extends BaseService {
         super.processHttpHeaders(headers);
 
         JSONArray jsonArray = null;
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
+
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
@@ -966,47 +790,35 @@ public class AutoPopulateService extends BaseService {
             connection = tsDataSource.getConnection();
             jsonArray = autoPopulateBO.populateWhoareyouwithDescriptor(tsDataSource,
                     connection);
-            responseDone = true;
 
-            return Response.status(status).entity(jsonArray.toString()).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(jsonArray.toString()).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error("populateWhoareyouwithDescriptor(HttpHeaders)", e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     } // end populateWhoareyouwithDescriptor()
+
     /**
      * DOCUMENT ME!
      *
@@ -1024,64 +836,49 @@ public class AutoPopulateService extends BaseService {
     public Response showInitData(@Context
     HttpHeaders headers) {
         super.processHttpHeaders(headers);
-    
+
         TSInitDataObj tsInitDataObj = null;
-        int status = TSResponseStatusCode.SUCCESS.getValue();
-        boolean responseDone = false;
+
         TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
         try {
             connection = tsDataSource.getConnection();
             tsInitDataObj = autoPopulateBO.showInitData(tsDataSource, connection);
-            responseDone = true;
 
             String identifierForVendor = headers.getRequestHeader(
                     "identifierForVendor").get(0);
 
             if (logger.isDebugEnabled()) {
-                logger.debug(
-                    "showInitData(HttpHeaders) - identifierForVendor=" +
+                logger.debug("showInitData(HttpHeaders) - identifierForVendor=" +
                     identifierForVendor);
             }
 
-            return Response.status(status).entity(tsInitDataObj).build();
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsInitDataObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         catch (SQLException e) {
             logger.error(e);
-            status = TSResponseStatusCode.ERROR.getValue();
 
             TSErrorObj tsErrorObj = new TSErrorObj();
 
             tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-            responseDone = true;
 
-            return Response.status(status).entity(tsErrorObj).build();
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
         } // end catch
         finally {
             tsDataSource.closeConnection(connection);
-
-            if (status != TSResponseStatusCode.SUCCESS.getValue()) {
-                if (!responseDone) {
-                    status = TSResponseStatusCode.ERROR.getValue();
-
-                    TSErrorObj tsErrorObj = new TSErrorObj();
-                    tsErrorObj.setErrorMsg(TSConstants.ERROR_UNKNOWN_SYSTEM_KEY);
-
-                    return Response.status(status).entity(tsErrorObj).build();
-                } // end if
-            } // end if
         } // end finally
     }
 } // end AutoPopulateService

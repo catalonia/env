@@ -63,7 +63,8 @@ public interface UserQueries extends TSDBCommonQueries {
         " users.CURRENT_STATUS," + " users.USER_FB_ID" + " FROM " + " users " +
         " WHERE TS_USER_EMAIL = ? " + "AND TS_USER_PW = ?";
     public static String USER_ONLINE_UPDATE_SQL = "UPDATE users " +
-        "SET IS_ONLINE, IS_ONLINE_UPDATED_DATETIME = ? " + "WHERE USER_ID = ?";
+        "SET IS_ONLINE = ? , IS_ONLINE_UPDATED_DATETIME = ? " +
+        "WHERE USER_ID = ?";
     public static String USER_STATUS_SELECT_SQL = "SELECT * FROM users WHERE USER_ID = ? AND CURRENT_STATUS = ?";
     public static String USER_CHECK_EMAIL_SELECT_SQL = "SELECT * FROM users WHERE TS_USER_EMAIL = ?";
     public static String USER_CHECK_EMAIL_STATUS_SELECT_SQL = "SELECT users.USER_ID, " +
@@ -75,7 +76,8 @@ public interface UserQueries extends TSDBCommonQueries {
         "users.USER_GENDER, " + "users.USER_CITY_ID, " + "users.USER_STATE, " +
         "users.IS_ONLINE, " + "users.USER_COUNTRY, " +
         "users.CURRENT_STATUS, " + "users.ABOUT, " + "users.USER_FB_ID " +
-        "FROM users WHERE TS_USER_EMAIL = ? " + "AND CURRENT_STATUS = ?";
+        "FROM users WHERE TS_USER_EMAIL = ? " +
+        "AND (CURRENT_STATUS = ? OR CURRENT_STATUS = ?)";
     public static String USER_FBID_SELECT_SQL = "SELECT * FROM users WHERE User_FB_ID = ? AND CURRENT_STATUS = ?";
     public static String USER_FBID_UPDATE_SQL = "UPDATE users SET USER_FB_ID = ? WHERE USER_ID = ?";
     public static String USERID_SELECT_SQL = "SELECT * FROM facebook_user_data WHERE USER_FB_ID IN (SELECT USER_FB_ID FROM users WHERE USER_ID = ?)";
@@ -268,9 +270,11 @@ public interface UserQueries extends TSDBCommonQueries {
     public static String CUISINE_DESC_CUISINE_TIER2_SELECT_SQL = "" +
         "SELECT CUISINE_DESC " + "FROM   CUISINE_TIER2_DESCRIPTOR " +
         "WHERE  CUISINE_ID = ? ";
-    public static String USERS_ABOUT_INSERT_SQL = "" + "INSERT INTO USERS " +
-        "            (USER_ID, " + "             ABOUT) " + "VALUES     (?, " +
-        "            ?) ";
+    public static String USERS_ABOUT_UPDATE_SQL = "" + "UPDATE USERS " +
+        "SET    USERS.ABOUT = ? " + "WHERE  USERS.USER_ID = ?";
+    public static String USERS_CURRENT_STATUS_UPDATE_SQL = "" +
+        "UPDATE USERS " + "SET    USERS.CURRENT_STATUS = ? " +
+        "WHERE  USERS.USER_ID = ? ";
 
     //USER_FRIEND_FB
     public static String USER_FRIEND_SIGNUP_FB_UPDATE_SQL = "UPDATE user_friend_fb SET INVITATION_SENT_YN = ? WHERE USER_ID = ? AND USER_FRIEND_FB = ?";

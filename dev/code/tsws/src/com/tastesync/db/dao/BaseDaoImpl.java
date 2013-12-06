@@ -2,7 +2,6 @@ package com.tastesync.db.dao;
 
 import com.tastesync.common.utils.CommonFunctionsUtil;
 
-import com.tastesync.db.pool.TSDataSource;
 import com.tastesync.db.queries.TSDBCommonQueries;
 
 import com.tastesync.exception.TasteSyncException;
