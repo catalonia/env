@@ -48,9 +48,6 @@ public interface UserBo {
     TSFacebookUserDataObj getUserId(TSDataSource tsDataSource,
         Connection connection, String userID) throws TasteSyncException;
 
-    TSUserObj getUserInformationByEmail(TSDataSource tsDataSource,
-        Connection connection, String email) throws TasteSyncException;
-
     List<TSUserProfileRestaurantsObj> getUserProfileRestaurants(
         TSDataSource tsDataSource, Connection connection, String userId,
         int type, int from, int to) throws TasteSyncException;
@@ -68,7 +65,7 @@ public interface UserBo {
         String userId) throws TasteSyncException;
 
     UserResponse login_fb(TSDataSource tsDataSource, Connection connection,
-        TSListFacebookUserDataObj list_user_profile) throws TasteSyncException;
+        TSListFacebookUserDataObj tsListFacebookUserDataObj, String identifierForVendor) throws TasteSyncException;
 
     void logout(TSDataSource tsDataSource, Connection connection,
         String userLogId, String userId) throws TasteSyncException;
@@ -119,7 +116,7 @@ public interface UserBo {
         Connection connection, String userId) throws TasteSyncException;
 
     int showTrustedFriend(TSDataSource tsDataSource, Connection connection,
-        String userId, String dest_user_id) throws TasteSyncException;
+        String userId, String destUserId) throws TasteSyncException;
 
     boolean submitMyProfileAboutMe(TSDataSource tsDataSource,
         Connection connection, String userId, String aboutMeText)

@@ -11,6 +11,8 @@ import com.tastesync.exception.TasteSyncException;
 
 import com.tastesync.model.objects.TSErrorObj;
 import com.tastesync.model.objects.TSKeyValueObj;
+import com.tastesync.model.objects.TSNotifWelcomeMessageForYouObj;
+import com.tastesync.model.objects.TSNotifWelcomeMessageObj;
 import com.tastesync.model.objects.TSRecoNotificationBaseObj;
 import com.tastesync.model.objects.TSRestaurantBasicObj;
 import com.tastesync.model.objects.TSSuccessObj;
@@ -509,7 +511,6 @@ public class AskReplyService extends BaseService {
             connection = tsDataSource.getConnection();
 
             String oauthUserId = null;
-            String userId = null;
 
             if (TSConstants.OAUTH_SWTICHED_ON) {
                 HeaderDataVO headerDataVO = headerOauthDataChecks(headers);
@@ -528,8 +529,7 @@ public class AskReplyService extends BaseService {
                 } // end if
 
                 oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
-
-                userId = oauthUserId;
+                recipientUserId=oauthUserId;
             } // end if
 
             TSSenderUserObj tsSenderUserObj = askReplyBO.showRecommendationMessage(tsDataSource,
@@ -561,6 +561,82 @@ public class AskReplyService extends BaseService {
         } // end finally
     } // end showRecommendationMessage()
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param headers DOCUMENT ME!
+     * @param userId DOCUMENT ME!
+     *
+     * @return DOCUMENT ME!
+     */
+    @GET
+    @Path("/recowelcome")
+    @org.codehaus.enunciate.jaxrs.TypeHint(TSNotifWelcomeMessageObj.class)
+    @Consumes({MediaType.APPLICATION_FORM_URLENCODED
+    })
+    @Produces({MediaType.APPLICATION_JSON
+    })
+    public Response showRecommendationWelcomeMessage(@Context
+    HttpHeaders headers, @QueryParam("userid")
+    String userId) {
+        super.processHttpHeaders(headers);
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+        Connection connection = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+
+            String oauthUserId = null;
+
+            if (TSConstants.OAUTH_SWTICHED_ON) {
+                HeaderDataVO headerDataVO = headerOauthDataChecks(headers);
+
+                if (headerDataVO == null) {
+                    return notAuthorised();
+                } // end if
+
+                OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                        connection, headerDataVO.getIdentifierForVendor(),
+                        headerDataVO.getInputOauthToken());
+
+                if ((oauthDataExtInfoVO == null) ||
+                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                    return notAuthorised(oauthDataExtInfoVO);
+                } // end if
+
+                oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
+                userId=oauthUserId;
+            } // end if
+
+            TSNotifWelcomeMessageObj tsNotifWelcomeMessageObj = askReplyBO.showRecommendationWelcomeMessage(tsDataSource,
+                    connection, userId);
+
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsNotifWelcomeMessageObj).build();
+        } // end try
+        catch (TasteSyncException e) {
+            logger.error(e);
+
+            TSErrorObj tsErrorObj = new TSErrorObj();
+            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
+        } // end catch
+        catch (SQLException e) {
+            logger.error(e);
+
+            TSErrorObj tsErrorObj = new TSErrorObj();
+            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+
+            return Response.status(TSResponseStatusCode.ERROR.getValue())
+                           .entity(tsErrorObj).build();
+        } // end catch
+        finally {
+            tsDataSource.closeConnection(connection);
+        } // end finally
+    } // end showRecommendationMessage()
+    
     /**
      * DOCUMENT ME!
      *

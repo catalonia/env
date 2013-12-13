@@ -4,6 +4,8 @@ import com.tastesync.db.pool.TSDataSource;
 
 import com.tastesync.exception.TasteSyncException;
 
+import com.tastesync.fb.process.TsFacebookRestFb;
+
 import com.tastesync.model.objects.TSErrorObj;
 import com.tastesync.model.vo.HeaderDataVO;
 
@@ -145,7 +147,6 @@ public abstract class BaseService {
      *
      * @return DOCUMENT ME!
      *
-     * @throws TasteSyncException DOCUMENT ME!
      */
     public HeaderDataVO headerOauthDataChecks(HttpHeaders headers) {
         String identifierForVendor = null;
@@ -279,6 +280,25 @@ public abstract class BaseService {
         //validate , version check
         writeResponseheader(headers);
     } // end processHttpHeaders()
+
+    public void processUserAndFriendDataBasedonFbSingleAccessToken(
+        TSDataSource tsDataSource, Connection connection, String accessToken)
+        throws TasteSyncException {
+        if (accessToken != null) {
+            TsFacebookRestFb tsFacebookRestFb = new TsFacebookRestFb();
+
+            try {
+                tsFacebookRestFb.processUserAndFriendDataBasedonFbSingleAccessToken(tsDataSource,
+                    connection, accessToken);
+            } catch (com.tastesync.fb.exception.TasteSyncException e) {
+                e.printStackTrace();
+                throw new TasteSyncException(e.getMessage());
+            }
+        } else {
+            logger.info(
+                "accessToken is null. Nothing to be done as part of processUserAndFriendDataBasedonFbSingleAccessToken. ");
+        }
+    }
 
     /**
      * DOCUMENT ME!

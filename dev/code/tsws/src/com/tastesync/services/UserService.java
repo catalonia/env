@@ -92,7 +92,6 @@ public class UserService extends BaseService {
      * DOCUMENT ME!
      *
      * @param headers DOCUMENT ME!
-     * @param notificationSetting DOCUMENT ME!
      *
      * @return DOCUMENT ME!
      */
@@ -1798,7 +1797,7 @@ public class UserService extends BaseService {
      *
      * @param headers DOCUMENT ME!
      * @param userId DOCUMENT ME!
-     * @param dest_user_id DOCUMENT ME!
+     * @param destUserId DOCUMENT ME!
      *
      * @return DOCUMENT ME!
      */
@@ -1812,7 +1811,7 @@ public class UserService extends BaseService {
     public Response showTrustedFriend(@Context
     HttpHeaders headers, @FormParam("userId")
     String userId, @FormParam("destUserId")
-    String dest_user_id) {
+    String destUserId) {
         super.processHttpHeaders(headers);
 
         TSDataSource tsDataSource = TSDataSource.getInstance();
@@ -1847,7 +1846,7 @@ public class UserService extends BaseService {
             } // end if
 
             int choise = userBo.showTrustedFriend(tsDataSource, connection,
-                    userId, dest_user_id);
+                    userId, destUserId);
             String retString = "";
 
             switch (choise) {
@@ -2251,22 +2250,52 @@ public class UserService extends BaseService {
         try {
             connection = tsDataSource.getConnection();
 
-            userResponse = userBo.login_fb(tsDataSource, connection,
-                    list_user_profile);
+            String accessToken = null;
 
-            String userId = userBo.getUserInformationByEmail(tsDataSource,
-                    connection,
-                    list_user_profile.getUser_profile_current().getEmail())
-                                  .getUserId();
+            if (list_user_profile == null) {
+                logger.info("list_user_profile is NULL ");
+
+                TSErrorObj tsErrorObj = new TSErrorObj();
+                tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+
+                return Response.status(TSResponseStatusCode.ERROR.getValue())
+                               .entity(tsErrorObj).build();
+            }
+
+            accessToken = list_user_profile.getFbAccessToken();
+
+            if (accessToken == null) {
+                logger.info("FbAccessToken is NULL ");
+
+                TSErrorObj tsErrorObj = new TSErrorObj();
+                tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+
+                return Response.status(TSResponseStatusCode.ERROR.getValue())
+                               .entity(tsErrorObj).build();
+            }
+
+            super.processUserAndFriendDataBasedonFbSingleAccessToken(tsDataSource,
+                connection, accessToken);
 
             //Get from the header
             String identifierForVendor = null;
-            String deviceType = null;
 
             if (headers.getRequestHeader("identifierForVendor") != null) {
                 identifierForVendor = headers.getRequestHeader(
                         "identifierForVendor").get(0);
             } // end if
+
+            userResponse = userBo.login_fb(tsDataSource, connection,
+                    list_user_profile, identifierForVendor);
+
+            if ((userResponse == null) || (userResponse.getUser() == null)) {
+                return notAuthorised();
+            }
+
+            String userId = userResponse.getUser().getUserId();
+
+            //Get from the header
+            String deviceType = null;
 
             if (headers.getRequestHeader("user-agent") != null) {
                 deviceType = headers.getRequestHeader("user-agent").get(0);
@@ -2732,6 +2761,9 @@ public class UserService extends BaseService {
         // BO - DO- DBQuery
         try {
             userId = CommonFunctionsUtil.converStringAsNullIfNeeded(userId);
+
+            //TODO
+            // destUserId should be from user' friend list
 
             // if userId is null, error!
             if (userId == null) {

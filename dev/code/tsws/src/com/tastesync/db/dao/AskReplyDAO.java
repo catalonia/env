@@ -4,6 +4,8 @@ import com.tastesync.db.pool.TSDataSource;
 
 import com.tastesync.exception.TasteSyncException;
 
+import com.tastesync.model.objects.TSNotifWelcomeMessageForYouObj;
+import com.tastesync.model.objects.TSNotifWelcomeMessageObj;
 import com.tastesync.model.objects.TSRecoNotificationBaseObj;
 import com.tastesync.model.objects.TSRestaurantBasicObj;
 import com.tastesync.model.objects.derived.TSRecoRequestNonAssignedObj;
@@ -17,6 +19,7 @@ import com.tastesync.model.objects.derived.TSSenderUserObj;
 import java.sql.Connection;
 
 import java.util.List;
+
 
 public interface AskReplyDAO {
     String showAskForRecommendationFriends(TSDataSource tsDataSource,
@@ -39,6 +42,10 @@ public interface AskReplyDAO {
 
     TSSenderUserObj showRecommendationMessage(TSDataSource tsDataSource,
         Connection connection, String messageId, String recipientUserId)
+        throws TasteSyncException;
+
+    TSNotifWelcomeMessageObj showRecommendationWelcomeMessage(
+        TSDataSource tsDataSource, Connection connection, String userId)
         throws TasteSyncException;
 
     TSRecommendationsFollowupObj showRecommendationsFollowup(

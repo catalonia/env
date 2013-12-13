@@ -26,27 +26,11 @@ public class RestaurantBOImpl implements RestaurantBO {
     private RestaurantDAO restaurantDAO = new RestaurantDAOImpl();
 
     @Override
-    @Deprecated
-    public List<TSRestaurantBuzzObj> showRestaurantBuzz(
-        TSDataSource tsDataSource, Connection connection, String userId,
-        String restaurantId) throws TasteSyncException {
-        return restaurantDAO.showRestaurantBuzz(tsDataSource, connection,
-            userId, restaurantId);
-    }
-
-    @Override
     public TSRestaurantBuzzCompleteObj showRestaurantBuzzComplete(
         TSDataSource tsDataSource, Connection connection, String userId,
         String restaurantId) throws TasteSyncException {
         return restaurantDAO.showRestaurantBuzzComplete(tsDataSource,
             connection, userId, restaurantId);
-    }
-
-    @Override
-    public TSRestaurantObj showRestaurantDetail(TSDataSource tsDataSource,
-        Connection connection, String restaurantId) throws TasteSyncException {
-        return restaurantDAO.showRestaurantDetail(tsDataSource, connection,
-            restaurantId);
     }
 
     @Override
@@ -94,13 +78,6 @@ public class RestaurantBOImpl implements RestaurantBO {
         throws TasteSyncException {
         return restaurantDAO.showRestaurantDetailTipAPSettings(tsDataSource,
             connection, userId);
-    }
-
-    @Override
-    public List<TSRestaurantObj> showRestaurantsDetailsList(
-        TSDataSource tsDataSource, Connection connection)
-        throws TasteSyncException {
-        return restaurantDAO.showRestaurantsDetailsList(tsDataSource, connection);
     }
 
     @Override

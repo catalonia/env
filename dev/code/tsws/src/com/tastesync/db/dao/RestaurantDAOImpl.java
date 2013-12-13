@@ -12,13 +12,11 @@ import com.tastesync.model.json.DayOpeningTiming;
 import com.tastesync.model.objects.TSMenuObj;
 import com.tastesync.model.objects.TSRestaurantDetailsObj;
 import com.tastesync.model.objects.TSRestaurantExtendInfoObj;
-import com.tastesync.model.objects.TSRestaurantObj;
 import com.tastesync.model.objects.TSRestaurantPhotoObj;
 import com.tastesync.model.objects.TSRestaurantQuesionNonTsAssignedObj;
 import com.tastesync.model.objects.TSRestaurantTipsAPSettingsObj;
 import com.tastesync.model.objects.TSUserProfileBasicObj;
 import com.tastesync.model.objects.derived.TSRestaurantBuzzCompleteObj;
-import com.tastesync.model.objects.derived.TSRestaurantBuzzObj;
 import com.tastesync.model.objects.derived.TSRestaurantBuzzRecoObj;
 import com.tastesync.model.objects.derived.TSRestaurantBuzzTipObj;
 import com.tastesync.model.objects.derived.TSRestaurantRecommendersDetailsObj;
@@ -49,138 +47,6 @@ import java.util.TimeZone;
 
 
 public class RestaurantDAOImpl extends BaseDaoImpl implements RestaurantDAO {
-    @Deprecated
-    private TSRestaurantBuzzObj getTSRestaurantBuzzObj(Connection connection,
-        String userId, RestaurantBuzzVO restaurantBuzzVO)
-        throws SQLException {
-        TSRestaurantBuzzObj tsRestaurantBuzzObj = null;
-
-        if (restaurantBuzzVO != null) {
-            String recommenderUserName = null;
-            String recommenderUserPhoto = null;
-            String recommenderFacebookId = null;
-
-            PreparedStatement statement = connection.prepareStatement(TSDBCommonQueries.FB_ID_FRM_USER_ID_SELECT_SQL);
-
-            statement.setString(1, restaurantBuzzVO.getRecommenderUserUserId());
-
-            ResultSet resultset = statement.executeQuery();
-
-            if (resultset.next()) {
-                recommenderFacebookId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "users.user_fb_id"));
-                statement.close();
-
-                statement = connection.prepareStatement(TSDBCommonQueries.FACEBOOK_USER_DATA_SELECT_SQL);
-                statement.setString(1, recommenderFacebookId);
-                resultset = statement.executeQuery();
-
-                if (resultset.next()) {
-                    recommenderUserName = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                                "facebook_user_data.name"));
-                    recommenderUserPhoto = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                                "facebook_user_data.picture"));
-                }
-
-                statement.close();
-            }
-
-            statement.close();
-
-            statement = connection.prepareStatement(TSDBCommonQueries.COUNT_RECOREQUEST_USER_FOLLOWEEFLAG_SELECT_SQL);
-            statement.setString(1, restaurantBuzzVO.getRecommenderUserUserId());
-            statement.setString(2, userId);
-
-            resultset = statement.executeQuery();
-
-            String recommendeeUserFolloweeFlag = "0"; // default
-            int rowCount = 0;
-
-            if (resultset.next()) {
-                rowCount = resultset.getInt(1);
-            }
-
-            if (rowCount > 0) {
-                recommendeeUserFolloweeFlag = "1";
-            }
-
-            statement.close();
-
-            statement = connection.prepareStatement(TSDBCommonQueries.RECOREQUEST_TS_ASSIGNED_SELECT_SQL);
-            statement.setString(1, restaurantBuzzVO.getRecorequestId());
-            statement.setString(2, restaurantBuzzVO.getRecommenderUserUserId());
-            resultset = statement.executeQuery();
-
-            String friendOrNot = null;
-
-            //only one result
-            if (resultset.next()) {
-                friendOrNot = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "recorequest_ts_assigned.ASSIGNED_USERTYPE"));
-            } else {
-                // invalid data case
-                return null;
-            }
-
-            statement.close();
-
-            String recorequestText = null;
-
-            //-- this means userId is friend of recommendeeUserId and we should use the free text field
-            if ("user-assigned-friend".equals(friendOrNot) ||
-                    "system-assigned-friend".equals(friendOrNot)) {
-                statement.close();
-
-                statement = connection.prepareStatement(TSDBCommonQueries.RECOREQUEST_USER_FRIEND_SELECT_SQL);
-                statement.setString(1, restaurantBuzzVO.getRecorequestId());
-                resultset = statement.executeQuery();
-
-                if (resultset.next()) {
-                    recorequestText = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                                "recorequest_user.recorequest_free_text"));
-                }
-
-                statement.close();
-            } else if ("user-assigned-other".equals(friendOrNot) ||
-                    "system-assigned-other".equals(friendOrNot)) {
-                statement.close();
-
-                statement = connection.prepareStatement(TSDBCommonQueries.RECOREQUEST_USER_OTHER_SELECT_SQL);
-                statement.setString(1, restaurantBuzzVO.getRecorequestId());
-                resultset = statement.executeQuery();
-
-                if (resultset.next()) {
-                    recorequestText = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                                "recorequest_user.reco_request_template_sentences"));
-                }
-
-                statement.close();
-            } else {
-                // invalid data case
-                return null;
-            }
-
-            statement.close();
-
-            TSUserProfileBasicObj recommenderUser = new TSUserProfileBasicObj();
-            recommenderUser.setName(recommenderUserName);
-            recommenderUser.setPhoto(recommenderUserPhoto);
-            recommenderUser.setUserId(restaurantBuzzVO.getRecommenderUserUserId());
-
-            tsRestaurantBuzzObj = new TSRestaurantBuzzObj();
-            tsRestaurantBuzzObj.setRecommenderUser(recommenderUser);
-
-            tsRestaurantBuzzObj.setReplyText(restaurantBuzzVO.getReplyText());
-            tsRestaurantBuzzObj.setReplyDatetime(restaurantBuzzVO.getReplyDatetime());
-
-            tsRestaurantBuzzObj.setRecommenderUserFolloweeFlag(recommendeeUserFolloweeFlag);
-
-            tsRestaurantBuzzObj.setRecorequestText(recorequestText);
-        }
-
-        return tsRestaurantBuzzObj;
-    }
-
     private TSRestaurantBuzzRecoObj getTSRestaurantBuzzRecoObj(
         Connection connection, String userId,
         RestaurantBuzzRecoVO restaurantBuzzRecoVO) throws SQLException {
@@ -726,134 +592,6 @@ public class RestaurantDAOImpl extends BaseDaoImpl implements RestaurantDAO {
         }
     }
 
-    //TODO to be removed
-    private void mapResultsetRowToTSRestaurantVO(
-        TSRestaurantObj tsRestaurantObj, ResultSet resultset)
-        throws SQLException {
-        tsRestaurantObj.setRestaurantId(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.RESTAURANT_ID")));
-
-        tsRestaurantObj.setFactualId(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.FACTUAL_ID")));
-
-        tsRestaurantObj.setRestaurantName(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.RESTAURANT_NAME")));
-
-        tsRestaurantObj.setFactualRating(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.FACTUAL_RATING")));
-
-        tsRestaurantObj.setPriceRange(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.PRICE_RANGE")));
-
-        tsRestaurantObj.setRestaurantCityId(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.RESTAURANT_CITY_ID")));
-
-        tsRestaurantObj.setRestaurantHours(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.RESTAURANT_HOURS")));
-
-        String restaurantHours = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                    "restaurant.RESTAURANT_HOURS"));
-        Boolean openNow = isOpenNow(restaurantHours);
-
-        if (openNow != null) {
-            if (openNow) {
-                tsRestaurantObj.setOpenNowFlag("1");
-            } else {
-                tsRestaurantObj.setOpenNowFlag("0");
-            }
-        } else {
-            tsRestaurantObj.setOpenNowFlag(null);
-        }
-
-        tsRestaurantObj.setRestaurantLat(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.RESTAURANT_LAT")));
-
-        tsRestaurantObj.setRestaurantLon(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.RESTAURANT_LON")));
-
-        if ((tsRestaurantObj.getRestaurantLat() == null) &&
-                (tsRestaurantObj.getRestaurantLon() == null)) {
-            tsRestaurantObj.setMoreInfoFlag("1");
-        } else {
-            tsRestaurantObj.setMoreInfoFlag("0");
-        }
-
-        tsRestaurantObj.setSumVoteCount(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.SUM_VOTE_COUNT")));
-
-        tsRestaurantObj.setSumVoteValue(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.SUM_VOTE_VALUE")));
-
-        tsRestaurantObj.setTbdOpenTableId(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant.TBD_OPENTABLE_ID")));
-    }
-
-    @Override
-    @Deprecated
-    public List<TSRestaurantBuzzObj> showRestaurantBuzz(
-        TSDataSource tsDataSource, Connection connection, String userId,
-        String restaurantId) throws TasteSyncException {
-        PreparedStatement statement = null;
-        ResultSet resultset = null;
-
-        try {
-            statement = connection.prepareStatement(RestaurantQueries.USER_RESTAURANT_ALL_RECO_REPLY_SELECT_SQL);
-            statement.setString(1, userId);
-            statement.setString(2, restaurantId);
-            resultset = statement.executeQuery();
-
-            List<RestaurantBuzzVO> restaurantBuzzVOList = new ArrayList<RestaurantBuzzVO>();
-
-            String replyId;
-            String replyText;
-            String recommenderUserUserId;
-            String replyDatetime;
-            String recorequestId;
-
-            while (resultset.next()) {
-                replyId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "USER_RESTAURANT_RECO.REPLY_ID"));
-
-                recommenderUserUserId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "USER_RESTAURANT_RECO.RECOMMENDER_USER_ID"));
-                replyDatetime = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "USER_RESTAURANT_RECO.UPDATED_DATETIME"));
-
-                recorequestId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "RECOREQUEST_REPLY_USER.RECOREQUEST_ID"));
-
-                replyText = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "RECOREQUEST_REPLY_USER.REPLY_TEXT"));
-
-                RestaurantBuzzVO restaurantBuzzVO = new RestaurantBuzzVO(replyId,
-                        replyText, recommenderUserUserId, replyDatetime,
-                        recorequestId);
-
-                restaurantBuzzVOList.add(restaurantBuzzVO);
-            }
-
-            statement.close();
-
-            List<TSRestaurantBuzzObj> tsRestaurantBuzzObjList = new ArrayList<TSRestaurantBuzzObj>(restaurantBuzzVOList.size());
-
-            for (RestaurantBuzzVO restaurantBuzzVO : restaurantBuzzVOList) {
-                TSRestaurantBuzzObj tsRestaurantBuzzObj = getTSRestaurantBuzzObj(connection,
-                        userId, restaurantBuzzVO);
-
-                tsRestaurantBuzzObjList.add(tsRestaurantBuzzObj);
-            }
-
-            return tsRestaurantBuzzObjList;
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            throw new TasteSyncException("Error while showRestaurantBuzz " +
-                e.getMessage());
-        } finally {
-            tsDataSource.closeConnection(statement, resultset);
-        }
-    }
-
     @Override
     public TSRestaurantBuzzCompleteObj showRestaurantBuzzComplete(
         TSDataSource tsDataSource, Connection connection, String userId,
@@ -1075,34 +813,6 @@ public class RestaurantDAOImpl extends BaseDaoImpl implements RestaurantDAO {
         } finally {
             tsDataSource.closeConnection(statement, resultset);
         }
-    }
-
-    @Override
-    public TSRestaurantObj showRestaurantDetail(TSDataSource tsDataSource,
-        Connection connection, String restaurantId) throws TasteSyncException {
-        TSRestaurantObj tsRestaurantObj = new TSRestaurantObj();
-        PreparedStatement statement = null;
-        ResultSet resultset = null;
-
-        try {
-            statement = connection.prepareStatement(RestaurantQueries.RESTAURANT_SELECT_SQL);
-            statement.setString(1, restaurantId);
-            resultset = statement.executeQuery();
-
-            //only one result
-            if (resultset.next()) {
-                mapResultsetRowToTSRestaurantVO(tsRestaurantObj, resultset);
-            }
-
-            statement.close();
-        } catch (SQLException e1) {
-            e1.printStackTrace();
-            throw new TasteSyncException(e1.getMessage());
-        } finally {
-            tsDataSource.closeConnection(statement, resultset);
-        }
-
-        return tsRestaurantObj;
     }
 
     @Override
@@ -1615,36 +1325,6 @@ public class RestaurantDAOImpl extends BaseDaoImpl implements RestaurantDAO {
         }
 
         return tsRestaurantTipsAPSettingsObjs;
-    }
-
-    @Override
-    public List<TSRestaurantObj> showRestaurantsDetailsList(
-        TSDataSource tsDataSource, Connection connection)
-        throws TasteSyncException {
-        List<TSRestaurantObj> tsRestaurantObjs = new ArrayList<TSRestaurantObj>();
-        PreparedStatement statement = null;
-        ResultSet resultset = null;
-
-        try {
-            statement = connection.prepareStatement(RestaurantQueries.RESTAURANTS_SELECT_SQL);
-            resultset = statement.executeQuery();
-
-            while (resultset.next()) {
-                TSRestaurantObj tsRestaurantObj = new TSRestaurantObj();
-                mapResultsetRowToTSRestaurantVO(tsRestaurantObj, resultset);
-
-                tsRestaurantObjs.add(tsRestaurantObj);
-            }
-
-            statement.close();
-        } catch (SQLException e1) {
-            e1.printStackTrace();
-            throw new TasteSyncException(e1.getMessage());
-        } finally {
-            tsDataSource.closeConnection(statement, resultset);
-        }
-
-        return tsRestaurantObjs;
     }
 
     @Override

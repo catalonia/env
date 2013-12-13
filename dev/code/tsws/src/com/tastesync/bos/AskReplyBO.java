@@ -4,6 +4,8 @@ import com.tastesync.db.pool.TSDataSource;
 
 import com.tastesync.exception.TasteSyncException;
 
+import com.tastesync.model.objects.TSNotifWelcomeMessageForYouObj;
+import com.tastesync.model.objects.TSNotifWelcomeMessageObj;
 import com.tastesync.model.objects.TSRecoNotificationBaseObj;
 import com.tastesync.model.objects.TSRestaurantBasicObj;
 import com.tastesync.model.objects.derived.TSRecoRequestNonAssignedObj;
@@ -40,6 +42,10 @@ public interface AskReplyBO {
 
     TSSenderUserObj showRecommendationMessage(TSDataSource tsDataSource,
         Connection connection, String messageId, String recipientUserId)
+        throws TasteSyncException;
+
+    TSNotifWelcomeMessageObj showRecommendationWelcomeMessage(
+        TSDataSource tsDataSource, Connection connection, String userId)
         throws TasteSyncException;
 
     TSRecommendationsFollowupObj showRecommendationsFollowup(

@@ -21,10 +21,6 @@ import java.util.List;
 
 
 public interface RestaurantDAO {
-    @Deprecated
-    List<TSRestaurantBuzzObj> showRestaurantBuzz(TSDataSource tsDataSource,
-        Connection connection, String userId, String restaurantId)
-        throws TasteSyncException;
 
     TSRestaurantBuzzCompleteObj showRestaurantBuzzComplete(
         TSDataSource tsDataSource, Connection connection, String userId,
@@ -33,9 +29,6 @@ public interface RestaurantDAO {
     TSRestaurantDetailsObj showRestaurantDetail(TSDataSource tsDataSource,
         Connection connection, String userId, String restaurantId)
         throws TasteSyncException;
-
-    TSRestaurantObj showRestaurantDetail(TSDataSource tsDataSource,
-        Connection connection, String restaurantId) throws TasteSyncException;
 
     TSRestaurantRecommendersDetailsObj showRestaurantDetailAsk(
         TSDataSource tsDataSource, Connection connection, String userId,
@@ -54,10 +47,6 @@ public interface RestaurantDAO {
 
     List<TSRestaurantTipsAPSettingsObj> showRestaurantDetailTipAPSettings(
         TSDataSource tsDataSource, Connection connection, String userId)
-        throws TasteSyncException;
-
-    List<TSRestaurantObj> showRestaurantsDetailsList(
-        TSDataSource tsDataSource, Connection connection)
         throws TasteSyncException;
 
     void submitAddOrRemoveFromFavs(TSDataSource tsDataSource,

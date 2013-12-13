@@ -6,6 +6,8 @@ import com.tastesync.db.pool.TSDataSource;
 
 import com.tastesync.exception.TasteSyncException;
 
+import com.tastesync.model.objects.TSNotifWelcomeMessageForYouObj;
+import com.tastesync.model.objects.TSNotifWelcomeMessageObj;
 import com.tastesync.model.objects.TSRecoNotificationBaseObj;
 import com.tastesync.model.objects.TSRestaurantBasicObj;
 import com.tastesync.model.objects.derived.TSRecoRequestNonAssignedObj;
@@ -65,6 +67,14 @@ public class AskReplyBOImpl implements AskReplyBO {
         String recipientUserId) throws TasteSyncException {
         return askReplyDAO.showRecommendationMessage(tsDataSource, connection,
             messageId, recipientUserId);
+    }
+
+    @Override
+    public TSNotifWelcomeMessageObj showRecommendationWelcomeMessage(
+        TSDataSource tsDataSource, Connection connection, String userId)
+        throws TasteSyncException {
+        return askReplyDAO.showRecommendationWelcomeMessage(tsDataSource,
+            connection, userId);
     }
 
     @Override

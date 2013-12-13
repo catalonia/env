@@ -5,134 +5,23 @@ import com.tastesync.common.utils.CommonFunctionsUtil;
 import com.tastesync.db.queries.CityQueries;
 import com.tastesync.db.queries.UserQueries;
 
+import com.tastesync.exception.TasteSyncException;
+
 import com.tastesync.model.objects.TSCityObj;
 import com.tastesync.model.objects.TSFacebookUserDataObj;
 import com.tastesync.model.objects.TSRestaurantObj;
 import com.tastesync.model.objects.TSUserObj;
 import com.tastesync.model.objects.TSUserProfileRestaurantsObj;
 
-import org.joda.time.DateTime;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 
 public class MySQL {
     public MySQL() {
         super();
-    }
-
-    public void addDeviceToken(Connection connection, String userID,
-        String devicetoken) throws SQLException {
-        PreparedStatement statement = null;
-        boolean check = true;
-
-        try {
-            statement = connection.prepareStatement(UserQueries.USER_DEVICE_SELECT_SQL);
-            statement.setString(1, userID);
-
-            ResultSet resultset = statement.executeQuery();
-
-            if (resultset.next()) {
-                check = false;
-            }
-
-            statement.close();
-
-            if (check) {
-                statement = connection.prepareStatement(UserQueries.USER_DEVICE_INSERT_SQL);
-                statement.setString(1, userID);
-                statement.setString(2, devicetoken);
-
-                DateTime currentDateTime = new DateTime();
-                statement.setTimestamp(3,
-                    new Timestamp(currentDateTime.toDate().getTime()));
-                statement.setTimestamp(4,
-                    new Timestamp(currentDateTime.plusMonths(12).toDate()
-                                                 .getTime()));
-                statement.execute();
-                statement.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    //Check email exist in the system
-    public boolean checkEmailExist(Connection connection, String email)
-        throws SQLException {
-        boolean check = false;
-        PreparedStatement statement = null;
-
-        try {
-            statement = connection.prepareStatement(UserQueries.USER_CHECK_EMAIL_SELECT_SQL);
-            statement.setString(1, email);
-
-            ResultSet resultset = statement.executeQuery();
-
-            if (resultset.next()) {
-                check = true;
-            }
-
-            statement.close();
-
-            return check;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public boolean checkFBUserDataExist(Connection connection, String user_fb_id)
-        throws SQLException {
-        boolean check = false;
-        PreparedStatement statement = null;
-
-        try {
-            statement = connection.prepareStatement(UserQueries.FACEBOOK_SELECT_SQL);
-            statement.setString(1, user_fb_id);
-
-            ResultSet resultset = statement.executeQuery();
-
-            if (resultset.next()) {
-                check = true;
-            }
-
-            statement.close();
-
-            return check;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     public boolean checkNotificationDescriptor(Connection connection,
@@ -207,7 +96,7 @@ public class MySQL {
         PreparedStatement statement = null;
 
         try {
-            statement = connection.prepareStatement(UserQueries.USER_FRIEND_TASTESYNC_CHECK_SELECT_SQL);
+            statement = connection.prepareStatement(UserQueries.COUNT_USER_FRIEND_TASTESYNC_CHECK_SELECT_SQL);
             statement.setString(1, userId);
             statement.setString(2, destUserId);
 
@@ -343,7 +232,7 @@ public class MySQL {
         PreparedStatement statement = null;
 
         try {
-            statement = connection.prepareStatement(CityQueries.CITY_STATE_SELECT_SQL);
+            statement = connection.prepareStatement(UserQueries.CITY_STATE_SELECT_SQL);
             statement.setString(1, state);
             statement.setString(2, city_name);
 
@@ -372,14 +261,15 @@ public class MySQL {
     }
 
     public String getDescAbout(Connection connection, int ID_ORDER)
-        throws SQLException {
+        throws TasteSyncException {
         PreparedStatement statement = null;
+        ResultSet resultset = null;
 
         try {
             statement = connection.prepareStatement(UserQueries.ABOUT_TASTESYNC_ELEMENT_DESCRIPTOR_SELECT_SQL);
             statement.setInt(1, ID_ORDER);
 
-            ResultSet resultset = statement.executeQuery();
+            resultset = statement.executeQuery();
 
             String value = null;
 
@@ -393,8 +283,19 @@ public class MySQL {
             return value;
         } catch (SQLException e) {
             e.printStackTrace();
-            throw e;
+            e.printStackTrace();
+
+            throw new TasteSyncException("Error while getDescAbout " +
+                e.getMessage());
         } finally {
+            if (resultset != null) {
+                try {
+                    resultset.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
             if (statement != null) {
                 try {
                     statement.close();
@@ -753,50 +654,16 @@ public class MySQL {
         }
     }
 
-    public TSUserObj getUserInformationByEmail(Connection connection,
-        String email) throws SQLException {
-        TSUserObj user = null;
-        PreparedStatement statement = null;
-
-        try {
-            statement = connection.prepareStatement(UserQueries.USER_CHECK_EMAIL_STATUS_SELECT_SQL);
-            statement.setString(1, email);
-            statement.setString(2, String.valueOf("e"));
-            statement.setString(3, String.valueOf("p"));
-
-            ResultSet resultset = statement.executeQuery();
-
-            if (resultset.next()) {
-                user = new TSUserObj();
-                MySQL.mapResultsetRowToTSUserVO(user, resultset);
-            }
-
-            statement.close();
-
-            return user;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     public TSUserObj getUserInformationByFacebookID(Connection connection,
-        String user_fb_id) throws SQLException {
+        String userFbId) throws SQLException {
         TSUserObj user = null;
         PreparedStatement statement = null;
 
         try {
             statement = connection.prepareStatement(UserQueries.USER_FBID_SELECT_SQL);
-            statement.setString(1, user_fb_id);
+            statement.setString(1, userFbId);
             statement.setString(2, String.valueOf("e"));
+            statement.setString(3, String.valueOf("p"));
 
             ResultSet resultset = statement.executeQuery();
 
@@ -825,13 +692,13 @@ public class MySQL {
     private static void mapResultsetRowToTSCityVO(TSCityObj tsCityObj,
         ResultSet resultset) throws SQLException {
         tsCityObj.setCityId(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("cities.city_id")));
+                resultset.getString("CITIES.CITY_ID")));
         tsCityObj.setCountry(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("cities.country")));
+                resultset.getString("CITIES.COUNTRY")));
         tsCityObj.setState(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("cities.state")));
+                resultset.getString("CITIES.STATE")));
         tsCityObj.setCity(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("cities.city")));
+                resultset.getString("CITIES.CITY")));
     }
 
     public static void mapResultsetRowToTSFacebookVO(

@@ -20,6 +20,8 @@ import com.tastesync.model.objects.TSNotifRecoLikeObj;
 import com.tastesync.model.objects.TSNotifRecoReplyObj;
 import com.tastesync.model.objects.TSNotifRecorequestAnswerObj;
 import com.tastesync.model.objects.TSNotifRecorequestNeededObj;
+import com.tastesync.model.objects.TSNotifWelcomeMessageForYouObj;
+import com.tastesync.model.objects.TSNotifWelcomeMessageObj;
 import com.tastesync.model.objects.TSRecoNotificationBaseObj;
 import com.tastesync.model.objects.TSRestaurantBasicObj;
 import com.tastesync.model.objects.TSRestaurantObj;
@@ -391,48 +393,72 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
 
     private String getCuisineTier2Desc(Connection connection,
         String restaurantId, String[] cuisineTier2IdArray)
-        throws SQLException {
+        throws TasteSyncException {
         String cuisineTier2Desc = null;
         String sql = null;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
-        //get cuisine Tier2 descriptor out of input
-        if ((cuisineTier2IdArray != null) && (cuisineTier2IdArray.length != 0)) {
-            sql = AskReplyQueries.CUISINE_TIER2_DESCRIPTOR_SEARCH_RESULTS_SELECT_SQL;
+        try {
+            //get cuisine Tier2 descriptor out of input
+            if ((cuisineTier2IdArray != null) &&
+                    (cuisineTier2IdArray.length != 0)) {
+                sql = AskReplyQueries.CUISINE_TIER2_DESCRIPTOR_SEARCH_RESULTS_SELECT_SQL;
 
-            StringBuffer buildQuestionMarksInSql = new StringBuffer();
+                StringBuffer buildQuestionMarksInSql = new StringBuffer();
 
-            // add additonal parameters as ?
-            for (int i = 0; i < cuisineTier2IdArray.length; ++i) {
-                buildQuestionMarksInSql.append("?");
+                // add additonal parameters as ?
+                for (int i = 0; i < cuisineTier2IdArray.length; ++i) {
+                    buildQuestionMarksInSql.append("?");
 
-                if (i != (cuisineTier2IdArray.length - 1)) {
-                    buildQuestionMarksInSql.append(",");
+                    if (i != (cuisineTier2IdArray.length - 1)) {
+                        buildQuestionMarksInSql.append(",");
+                    }
+                }
+
+                sql = StringUtils.replace(sql, "1_REPLACE_PARAM",
+                        buildQuestionMarksInSql.toString());
+                statement = connection.prepareStatement(sql);
+
+                int bindposition = 0;
+
+                for (String cuisineTier2Id : cuisineTier2IdArray) {
+                    ++bindposition;
+                    statement.setString(bindposition, cuisineTier2Id);
+                }
+
+                ++bindposition;
+                statement.setString(bindposition, restaurantId);
+                resultset = statement.executeQuery();
+
+                if (resultset.next()) {
+                    cuisineTier2Desc = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                                "CUISINE_TIER2_DESCRIPTOR.CUISINE_DESC"));
+                }
+
+                statement.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            throw new TasteSyncException("Error while getCuisineTier2Desc " +
+                e.getMessage());
+        } finally {
+            if (resultset != null) {
+                try {
+                    resultset.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
             }
 
-            sql = StringUtils.replace(sql, "1_REPLACE_PARAM",
-                    buildQuestionMarksInSql.toString());
-            statement = connection.prepareStatement(sql);
-
-            int bindposition = 0;
-
-            for (String cuisineTier2Id : cuisineTier2IdArray) {
-                ++bindposition;
-                statement.setString(bindposition, cuisineTier2Id);
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
-
-            ++bindposition;
-            statement.setString(bindposition, restaurantId);
-            resultset = statement.executeQuery();
-
-            if (resultset.next()) {
-                cuisineTier2Desc = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "CUISINE_TIER2_DESCRIPTOR.CUISINE_DESC"));
-            }
-
-            statement.close();
         }
 
         return cuisineTier2Desc;
@@ -620,6 +646,22 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(e.getMessage());
+        } finally {
+            if (resultset != null) {
+                try {
+                    resultset.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -1745,6 +1787,51 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
         }
     }
 
+    private void processTSNotifWelcomeMessageForYouObj(Connection connection,
+        TSRecoNotificationBaseObj tsRecoNotificationBaseObjElement,
+        List<TSRecoNotificationBaseObj> recoNotificationBaseList, String userId)
+        throws SQLException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            TSNotifWelcomeMessageForYouObj tsNotifWelcomeMessageForYouObj = new TSNotifWelcomeMessageForYouObj();
+            tsNotifWelcomeMessageForYouObj.setRecoNotificationType(TSConstants.RECONOTIFICATION_TYPE_WELCOME_MSG);
+            tsNotifWelcomeMessageForYouObj.setWelcomemessage(TSConstants.RECONOTIFICATION_WELCOME_MSG_TXT);
+            tsNotifWelcomeMessageForYouObj.setUnreadCounter(tsRecoNotificationBaseObjElement.getUnreadCounter());
+            tsNotifWelcomeMessageForYouObj.setIdBase(tsRecoNotificationBaseObjElement.getIdBase());
+            tsNotifWelcomeMessageForYouObj.setMaxPaginationId(tsRecoNotificationBaseObjElement.getMaxPaginationId());
+
+            statement = connection.prepareStatement(AskReplyQueries.USER_NOTIF_WELCOME_MESSAGE_SELECT_SQL);
+            statement.setString(1, userId);
+            resultset = statement.executeQuery();
+
+            //only one result
+            if (resultset.next()) {
+                String createdDatetime = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "USER_NOTIF_WELCOME_MESSAGE.CREATED"));
+                //TODO formatting!!
+                tsNotifWelcomeMessageForYouObj.setCreatedDatetime(createdDatetime);
+                tsNotifWelcomeMessageForYouObj.setDatetimeBase(resultset.getTimestamp(
+                        "USER_NOTIF_WELCOME_MESSAGE.CREATED"));
+                tsNotifWelcomeMessageForYouObj.setViewed(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "USER_NOTIF_WELCOME_MESSAGE.MESSAGE_RECIPIENT_VIEWED")));
+                recoNotificationBaseList.add(tsNotifWelcomeMessageForYouObj);
+            }
+
+            statement.close();
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+
+            if (resultset != null) {
+                resultset.close();
+            }
+        }
+    }
+
     @Override
     public String showAskForRecommendationFriends(TSDataSource tsDataSource,
         Connection connection, String recoRequestId) throws TasteSyncException {
@@ -1805,27 +1892,18 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
 
         List<TSRestaurantsTileSearchObj> tsRestaurantsTileSearchObjList = new ArrayList<TSRestaurantsTileSearchObj>();
 
-        try {
-            for (String restaurantIdElement : restaurantIdList) {
-                tsRestaurantsTileSearchObj = getRestaurantTileSearchReslt(connection,
-                        restaurantIdElement);
+        for (String restaurantIdElement : restaurantIdList) {
+            tsRestaurantsTileSearchObj = getRestaurantTileSearchReslt(connection,
+                    restaurantIdElement);
 
-                String cuisineTier2Desc = getCuisineTier2Desc(connection,
-                        restaurantIdElement, cuisineTier2IdArray);
+            String cuisineTier2Desc = getCuisineTier2Desc(connection,
+                    restaurantIdElement, cuisineTier2IdArray);
 
-                if (cuisineTier2Desc != null) {
-                    tsRestaurantsTileSearchObj.setCuisineTier2Name(cuisineTier2Desc);
-                }
-
-                tsRestaurantsTileSearchObjList.add(tsRestaurantsTileSearchObj);
+            if (cuisineTier2Desc != null) {
+                tsRestaurantsTileSearchObj.setCuisineTier2Name(cuisineTier2Desc);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
 
-            throw new TasteSyncException(
-                "Error while creating showListOfRestaurantsSearchResults " +
-                e.getMessage());
-        } finally {
+            tsRestaurantsTileSearchObjList.add(tsRestaurantsTileSearchObj);
         }
 
         TSRestaurantsTileSearchExtendedInfoObj tsRestaurantsTileSearchExtendedInfoObj =
@@ -2040,7 +2118,7 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
 
         try {
             tsDataSource.begin();
-            
+
             statement = connection.prepareStatement(AskReplyQueries.RECOREQUEST_USER_INITIATOR_USER_ID_SELECT_SQL);
             statement.setString(1, recorequestId);
             resultset = statement.executeQuery();
@@ -2055,7 +2133,7 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                     "Unknown recoInitiatorUserId for recorequestId=" +
                     recorequestId);
             }
-            
+
             statement = connection.prepareStatement(AskReplyQueries.RECOREQUEST_RESTAURANT_SELECT_SQL);
             statement.setString(1, recorequestId);
             resultset = statement.executeQuery();
@@ -2072,8 +2150,9 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                     recommendedrestaurantsRestaurantName = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant.restaurant_name"));
                 }
+
                 String unreadCounter = getUnreadCounterNotificationsAll(connection,
-                		recoInitiatorUserId);
+                        recoInitiatorUserId);
                 TSRestaurantBasicObj tsRestaurantBasicObj = new TSRestaurantBasicObj();
                 tsRestaurantBasicObj.setRestaurantId(recommendedrestaurantsRestaurantId);
                 tsRestaurantBasicObj.setRestaurantName(recommendedrestaurantsRestaurantName);
@@ -2215,6 +2294,43 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                 "Error while showRecommendationMessage " + e.getMessage());
         } finally {
             tsDataSource.closeConnection(statement, resultset);
+        }
+    }
+
+    @Override
+    public TSNotifWelcomeMessageObj showRecommendationWelcomeMessage(
+        TSDataSource tsDataSource, Connection connection, String userId)
+        throws TasteSyncException {
+        PreparedStatement statement = null;
+
+        try {
+            String unreadCounter = getUnreadCounterNotificationsAll(connection,
+                    userId);
+
+            TSNotifWelcomeMessageObj tsNotifWelcomeMessageForYouObj = new TSNotifWelcomeMessageObj();
+            tsNotifWelcomeMessageForYouObj.setUnreadCounter(unreadCounter);
+            tsNotifWelcomeMessageForYouObj.setMessage(TSConstants.RECONOTIFICATION_WELCOME_MSG_TXT);
+
+            statement = connection.prepareStatement(AskReplyQueries.USER_NOTIF_WELCOME_MESSAGE_UPDATE_SQL);
+            statement.setString(1, userId);
+            statement.executeUpdate();
+            statement.close();
+
+            return tsNotifWelcomeMessageForYouObj;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+
+            throw new TasteSyncException(
+                "Error while showAskForRecommendationFriends " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, null);
         }
     }
 
@@ -2650,6 +2766,11 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                 } else if (TSConstants.RECONOTIFICATION_TYPE_DID_LIKE.equals(
                             tsRecoNotificationBaseObjElement.getRecoNotificationType())) {
                     processTSNotifDidYouLikeObj(connection,
+                        tsRecoNotificationBaseObjElement,
+                        recoNotificationBaseList, userId);
+                } else if (TSConstants.RECONOTIFICATION_TYPE_WELCOME_MSG.equals(
+                            tsRecoNotificationBaseObjElement.getRecoNotificationType())) {
+                    processTSNotifWelcomeMessageForYouObj(connection,
                         tsRecoNotificationBaseObjElement,
                         recoNotificationBaseList, userId);
                 }

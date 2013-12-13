@@ -77,12 +77,6 @@ public class UserBoImpl implements UserBo {
     }
 
     @Override
-    public TSUserObj getUserInformationByEmail(TSDataSource tsDataSource,
-        Connection connection, String email) throws TasteSyncException {
-        return userDao.getUserInformationByEmail(tsDataSource, connection, email);
-    }
-
-    @Override
     public List<TSUserProfileRestaurantsObj> getUserProfileRestaurants(
         TSDataSource tsDataSource, Connection connection, String userId,
         int type, int from, int to) throws TasteSyncException {
@@ -116,9 +110,10 @@ public class UserBoImpl implements UserBo {
 
     @Override
     public UserResponse login_fb(TSDataSource tsDataSource,
-        Connection connection, TSListFacebookUserDataObj list_user_profile)
+        Connection connection, TSListFacebookUserDataObj tsListFacebookUserDataObj, 
+        String identifierForVendor)
         throws TasteSyncException {
-        return userDao.login_fb(tsDataSource, connection, list_user_profile);
+        return userDao.login_fb(tsDataSource, connection, tsListFacebookUserDataObj, identifierForVendor);
     }
 
     @Override
@@ -224,10 +219,10 @@ public class UserBoImpl implements UserBo {
 
     @Override
     public int showTrustedFriend(TSDataSource tsDataSource,
-        Connection connection, String userId, String dest_user_id)
+        Connection connection, String userId, String destUserId)
         throws TasteSyncException {
         return userDao.showTrustedFriend(tsDataSource, connection, userId,
-            dest_user_id);
+        		destUserId);
     }
 
     @Override
