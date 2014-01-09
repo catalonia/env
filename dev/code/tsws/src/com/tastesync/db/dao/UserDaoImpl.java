@@ -1,8 +1,5 @@
 package com.tastesync.db.dao;
 
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
-
 import com.tastesync.common.GlobalVariables;
 import com.tastesync.common.MySQL;
 import com.tastesync.common.utils.CommonFunctionsUtil;
@@ -13,11 +10,6 @@ import com.tastesync.db.queries.TSDBCommonQueries;
 import com.tastesync.db.queries.UserQueries;
 
 import com.tastesync.exception.TasteSyncException;
-
-import com.tastesync.fb.json.FBLocation;
-import com.tastesync.fb.model.fqlmodel.FqlFriend;
-import com.tastesync.fb.model.fqlmodel.FqlUser;
-import com.tastesync.fb.process.TsFacebookRestFb;
 
 import com.tastesync.model.objects.TSAboutObj;
 import com.tastesync.model.objects.TSAskSubmitLoginObj;
@@ -45,13 +37,7 @@ import com.tastesync.model.response.UserResponse;
 import com.tastesync.oauth.dao.OAuthDAO;
 import com.tastesync.oauth.dao.OAuthDAOImpl;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-
 import org.joda.time.DateTime;
-
-import java.io.IOException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -69,6 +55,54 @@ import java.util.List;
 
 public class UserDaoImpl extends BaseDaoImpl implements UserDao {
     OAuthDAO oauthDAO = new OAuthDAOImpl();
+
+    @Override
+    public void addUserDevices(TSDataSource tsDataSource,
+        Connection connection,
+        TSListFacebookUserDataObj tsListFacebookUserDataObj, String userID)
+        throws TasteSyncException {
+        PreparedStatement statement = null;
+        tsDataSource.begin();
+
+        try {
+            String deviceToken = tsListFacebookUserDataObj.getDevice_token();
+
+            if ((deviceToken != null) && !deviceToken.equals("")) {
+                statement = connection.prepareStatement(UserQueries.USER_DEVICE_INSERT_SQL);
+                statement.setString(1, userID);
+                statement.setString(2, deviceToken);
+
+                DateTime currentDateTime = new DateTime();
+                statement.setTimestamp(3,
+                    new Timestamp(currentDateTime.toDate().getTime()));
+                statement.setTimestamp(4,
+                    new Timestamp(currentDateTime.plusMonths(12).toDate()
+                                                 .getTime()));
+                statement.setTimestamp(5,
+                    new Timestamp(currentDateTime.toDate().getTime()));
+                statement.setTimestamp(6,
+                    new Timestamp(currentDateTime.plusMonths(12).toDate()
+                                                 .getTime()));
+                statement.setString(7, userID);
+                statement.execute();
+                statement.close();
+            }
+
+            tsDataSource.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+
+            throw new TasteSyncException("login_fb " + e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, null);
+        }
+    }
 
     @Override
     public void followUserStatusChange(TSDataSource tsDataSource,
@@ -275,40 +309,6 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
             throw new TasteSyncException(e.getMessage());
         } finally {
             tsDataSource.closeConnection(statement, resultset);
-        }
-    }
-
-    @Override
-    public String getAutoUserLogByUserId(TSDataSource tsDataSource,
-        Connection connection, String userLogId) throws TasteSyncException {
-        String userId = "";
-        PreparedStatement statement = null;
-
-        try {
-            statement = connection.prepareStatement(UserQueries.USER_ID_FROM_USERLOG_SELECT_SQL);
-            statement.setString(1, userLogId);
-
-            ResultSet resultset = statement.executeQuery();
-
-            if (resultset.next()) {
-                userId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "users_log.USER_ID"));
-            }
-
-            statement.close();
-
-            return userId;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new TasteSyncException(e.getMessage());
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -716,6 +716,7 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
         try {
             List<TSUserProfileRestaurantsObj> subRestaurantList = new ArrayList<TSUserProfileRestaurantsObj>();
             List<String> restaurantListId = new ArrayList<String>();
+            String restaurantListIdElement = null;
 
             if ((type == GlobalVariables.RESTAURANT_PROFILE_DETAIL_TYPE_ALL) ||
                     (type == GlobalVariables.RESTAURANT_PROFILE_DETAIL_TYPE_FAV)) {
@@ -725,8 +726,11 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
                 resultset = statement.executeQuery();
 
                 while (resultset.next()) {
-                    restaurantListId.add(CommonFunctionsUtil.converStringAsNullIfNeeded(
-                            resultset.getString("RESTAURANT_ID")));
+                	restaurantListIdElement=CommonFunctionsUtil.converStringAsNullIfNeeded(
+                            resultset.getString("RESTAURANT_ID"));
+                	if (!restaurantListId.contains(restaurantListIdElement)) {
+                        restaurantListId.add(restaurantListIdElement);
+                	}
                 }
 
                 statement.close();
@@ -743,8 +747,11 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
                 resultset = statement.executeQuery();
 
                 while (resultset.next()) {
-                    restaurantListId.add(CommonFunctionsUtil.converStringAsNullIfNeeded(
-                            resultset.getString("RESTAURANT_ID")));
+                	restaurantListIdElement=CommonFunctionsUtil.converStringAsNullIfNeeded(
+                            resultset.getString("RESTAURANT_ID"));
+                	if (!restaurantListId.contains(restaurantListIdElement)) {
+                        restaurantListId.add(restaurantListIdElement);
+                	}
                 }
 
                 statement.close();
@@ -761,8 +768,11 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
                 resultset = statement.executeQuery();
 
                 while (resultset.next()) {
-                    restaurantListId.add(CommonFunctionsUtil.converStringAsNullIfNeeded(
-                            resultset.getString("RESTAURANT_ID")));
+                	restaurantListIdElement=CommonFunctionsUtil.converStringAsNullIfNeeded(
+                            resultset.getString("RESTAURANT_ID"));
+                	if (!restaurantListId.contains(restaurantListIdElement)) {
+                        restaurantListId.add(restaurantListIdElement);
+                	}
                 }
 
                 statement.close();
@@ -779,8 +789,12 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
                 resultset = statement.executeQuery();
 
                 while (resultset.next()) {
-                    restaurantListId.add(CommonFunctionsUtil.converStringAsNullIfNeeded(
-                            resultset.getString("RESTAURANT_ID")));
+                	restaurantListIdElement=CommonFunctionsUtil.converStringAsNullIfNeeded(
+                            resultset.getString("RESTAURANT_ID"));
+                	if (!restaurantListId.contains(restaurantListIdElement)) {
+                        restaurantListId.add(restaurantListIdElement);
+                	}
+
                 }
 
                 statement.close();
@@ -1172,390 +1186,97 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
         }
     }
 
-    @Override
-    public UserResponse login(TSDataSource tsDataSource, Connection connection,
-        String email, String password) throws TasteSyncException {
-        TSUserObj tsUserObj = null;
-
-        PreparedStatement statement = null;
-        ResultSet resultset = null;
-        String id = null;
-        UserResponse userResponse = null;
-
-        try {
-            tsDataSource.begin();
-            statement = connection.prepareStatement(UserQueries.USER_LOGIN_SELECT_SQL);
-            statement.setString(1, email);
-            statement.setString(2, password);
-            resultset = statement.executeQuery();
-
-            if (resultset.next()) {
-                tsUserObj = new TSUserObj();
-                MySQL.mapResultsetRowToTSUserVO(tsUserObj, resultset);
-            }
-
-            statement.close();
-
-            if (tsUserObj != null) {
-                statement = connection.prepareStatement(UserQueries.USER_ONLINE_UPDATE_SQL);
-                statement.setString(1, "Y");
-                statement.setTimestamp(2,
-                    CommonFunctionsUtil.getCurrentDateTimestamp());
-                statement.setString(3, tsUserObj.getUserId());
-                statement.executeUpdate();
-                statement.close();
-
-                statement = connection.prepareStatement(UserQueries.USER_LOGIN_INSERT_SQL,
-                        Statement.RETURN_GENERATED_KEYS);
-                statement.setString(1, tsUserObj.getUserId());
-
-                String dateNow = CommonFunctionsUtil.getCurrentDatetime();
-                statement.setString(2, dateNow);
-                statement.setString(3, dateNow);
-                statement.executeUpdate();
-
-                resultset = statement.getGeneratedKeys();
-
-                int risultato = 0;
-
-                if (resultset.next()) {
-                    risultato = resultset.getInt(1);
-                }
-
-                statement.close();
-
-                String auto_id = String.valueOf(risultato);
-                String dateNowAppend = CommonFunctionsUtil.getCurrentDatetimeAppendField();
-                id = dateNowAppend + "-" + tsUserObj.getUserId() + "-" +
-                    risultato;
-
-                statement = connection.prepareStatement(UserQueries.USERLOG_LOGID_UPDATE_SQL);
-                statement.setString(1, id);
-                statement.setString(2, auto_id);
-                statement.executeUpdate();
-                statement.close();
-
-                userResponse = new UserResponse();
-                userResponse.setUser(tsUserObj);
-                userResponse.setUser_log_id(id);
-            }
-
-            tsDataSource.commit();
-
-            return userResponse;
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            try {
-                tsDataSource.rollback();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            }
-
-            throw new TasteSyncException(e.getMessage());
-        } finally {
-            tsDataSource.closeConnection(statement, resultset);
-        }
-    }
-
-    @Override
-    public String loginAccount(TSDataSource tsDataSource,
-        Connection connection, String userId) throws TasteSyncException {
-        String dateNow = CommonFunctionsUtil.getCurrentDatetime();
-        PreparedStatement statement = null;
-
-        String id = CommonFunctionsUtil.generateUniqueKey();
-
-        //Update login time (users_log table)
-        try {
-            tsDataSource.begin();
-            statement = connection.prepareStatement(UserQueries.USER_LOGIN_INSERT_SQL);
-            statement.setString(1, userId);
-            statement.setString(2, dateNow);
-            statement.setString(3, dateNow);
-            statement.setString(4, id);
-            statement.execute();
-            statement.close();
-            tsDataSource.commit();
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            try {
-                tsDataSource.rollback();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            }
-
-            throw new TasteSyncException(e.getMessage());
-        } finally {
-            tsDataSource.closeConnection(statement, null);
-        }
-
-        return id;
-    }
-
-    @Override
-    public UserResponse login_fb(TSDataSource tsDataSource,
-        Connection connection,
-        TSListFacebookUserDataObj tsListFacebookUserDataObj,
-        String identifierForVendor) throws TasteSyncException {
-        UserResponse userResponse = null;
-        String dateNow = CommonFunctionsUtil.getCurrentDatetime();
-        MySQL mySQL = new MySQL();
-
-        List<TSUserObj> list_friends_using_TasteSync = new ArrayList<TSUserObj>();
-
-        PreparedStatement statement = null;
-        tsDataSource.begin();
-
-        try {
-            FacebookClient facebookClient = new DefaultFacebookClient(tsListFacebookUserDataObj.getFbAccessToken());
-
-            List<FqlUser> users = facebookClient.executeFqlQuery(TsFacebookRestFb.USER_QUERY,
-                    FqlUser.class);
-
-            System.out.println("Users: " + users);
-
-            if ((users == null) || users.isEmpty()) {
-                logger.info(
-                    "No User data found using Facebook Query data using accessToken=" +
-                    tsListFacebookUserDataObj.getFbAccessToken());
-
-                // delete also oauth related data which is invalid
-                return userResponse;
-            }
-
-            //TODO set offline criteria
-
-            //String userFbId = users.get(0).uid;
-            FqlUser currentUserFB = users.get(0);
-
-            //improve - count
-            TSUserObj currentUser = mySQL.getUserInformationByFacebookID(connection,
-                    currentUserFB.uid);
-
-            ObjectMapper mapper = new ObjectMapper();
-
-            FBLocation currentLocation = null;
-            String cityFB = null;
-            String userCityId = null;
-            String stateFB = null;
-            String countryFB = null;
-
-            if (currentUserFB.current_location != null) {
-                currentLocation = mapper.readValue(currentUserFB.current_location,
-                        FBLocation.class);
-                stateFB = currentLocation.getState();
-                countryFB = currentLocation.getCountry();
-                cityFB = currentLocation.getCity();
-
-                if ((stateFB != null) && !stateFB.isEmpty() &&
-                        (cityFB != null) && !cityFB.isEmpty()) {
-                    TSCityObj cityInfoObj = mySQL.getCityInforByStateAndCityName(connection,
-                            countryFB, cityFB);
-
-                    if (cityInfoObj != null) {
-                        userCityId = cityInfoObj.getCityId();
-                    }
-                }
-            }
-
-            if (userCityId == null) {
-                cityFB = null;
-                userCityId = null;
-                stateFB = null;
-                countryFB = null;
-
-                FBLocation hometownLocation = null;
-
-                if (currentUserFB.hometown_location != null) {
-                    hometownLocation = mapper.readValue(currentUserFB.hometown_location,
-                            FBLocation.class);
-                    stateFB = hometownLocation.getState();
-                    countryFB = hometownLocation.getCountry();
-                    cityFB = hometownLocation.getCity();
-
-                    if ((stateFB != null) && !stateFB.isEmpty() &&
-                            (cityFB != null) && !cityFB.isEmpty()) {
-                        TSCityObj cityInfoObj = mySQL.getCityInforByStateAndCityName(connection,
-                                stateFB, cityFB);
-
-                        if (cityInfoObj != null) {
-                            userCityId = cityInfoObj.getCityId();
-                        }
-                    }
-                }
-            }
-
-            String state = (userCityId == null) ? GlobalVariables.DEFAULT_STATE
-                                                : stateFB;
-            String country = (userCityId == null)
-                ? GlobalVariables.DEFAULT_COUNTRY : countryFB;
-
-            String user_city_id = (userCityId == null)
-                ? GlobalVariables.DEFAULT_CITY_ID : userCityId;
-
-            String userID = null;
-
-            if (currentUser != null) {
-                userID = currentUser.getUserId();
-            } else {
-                userID = user_city_id + "-" +
-                    CommonFunctionsUtil.generateUniqueKey();
-            }
-
-            //Create a new user
-            if (currentUser == null) {
-                statement = connection.prepareStatement(UserQueries.USER_FACEBOOK_INSERT_SQL);
-                statement.setString(1, currentUserFB.email);
-                statement.setString(2, dateNow);
-                statement.setString(3, currentUserFB.first_name);
-                statement.setString(4, currentUserFB.last_name);
-                statement.setString(5, currentUserFB.sex);
-                statement.setString(6, user_city_id);
-                statement.setString(7, state);
-                statement.setString(8, country);
-                statement.setString(9, currentUserFB.uid);
-                statement.setString(10, userID);
-                statement.setString(11, userID);
-                statement.execute();
-                statement.close();
-
-                currentUser = mySQL.getUserInformationByFacebookID(connection,
-                        currentUserFB.uid);
-            } else {
-                statement = connection.prepareStatement(UserQueries.USER_ONLINE_UPDATE_SQL);
-                statement.setString(1, String.valueOf("y"));
-                statement.setTimestamp(2,
-                    CommonFunctionsUtil.getCurrentDateTimestamp());
-                statement.setString(3, currentUser.getUserId());
-                statement.executeUpdate();
-                statement.close();
-            }
-
-            // insert data into user_fb_access table!!
-            statement = connection.prepareStatement(UserQueries.USER_FB_ACCESS_INSERT_SQL);
-            statement.setString(1, tsListFacebookUserDataObj.getFbAccessToken());
-            statement.setTimestamp(2,
-                CommonFunctionsUtil.getCurrentDateTimestamp());
-
-            String fbAccessTokenId = CommonFunctionsUtil.generateUniqueKey();
-            statement.setString(3, fbAccessTokenId);
-            statement.setString(4, "0");
-            statement.setTimestamp(5,
-                CommonFunctionsUtil.getCurrentDateTimestamp());
-            statement.setString(6, currentUser.getUserFbId());
-            statement.setString(7, currentUser.getUserId());
-            statement.setString(8, identifierForVendor);
-
-            statement.setTimestamp(9,
-                CommonFunctionsUtil.getCurrentDateTimestamp());
-            statement.setString(10, identifierForVendor);
-
-            statement.executeUpdate();
-            statement.close();
-
-            // Get friends list
-            List<FqlFriend> friends = facebookClient.executeFqlQuery(TsFacebookRestFb.FRIENDS_USER_QUERY,
-                    FqlFriend.class);
-
-            if ((friends != null) && !friends.isEmpty()) {
-                for (FqlFriend fqlFriend : friends) {
-                    System.out.println("fqlFriend=" + fqlFriend);
-
-                    //Check user' friends using TasteSync
-                    TSUserObj user_fb = mySQL.getUserInformationByFacebookID(connection,
-                            fqlFriend.uid);
-
-                    if (user_fb != null) {
-                        list_friends_using_TasteSync.add(user_fb);
-                    }
-                }
-            }
-
-            if (statement != null) {
-                statement.close();
-            }
-
-            if ((list_friends_using_TasteSync != null) &&
-                    !list_friends_using_TasteSync.isEmpty()) {
-                statement = connection.prepareStatement(UserQueries.USER_FRIEND_TASTESYNC_TRUST_INSERT_UPDATE_SQL);
-
-                for (TSUserObj tsUserObj : list_friends_using_TasteSync) {
-                    statement.setString(1, tsUserObj.getUserId());
-                    statement.setString(2, userID);
-                    statement.execute();
-                }
-
-                statement.close();
-            }
-
-            String deviceToken = tsListFacebookUserDataObj.getDevice_token();
-
-            if ((deviceToken != null) && !deviceToken.equals("")) {
-                statement = connection.prepareStatement(UserQueries.USER_DEVICE_INSERT_SQL);
-                statement.setString(1, userID);
-                statement.setString(2, deviceToken);
-
-                DateTime currentDateTime = new DateTime();
-                statement.setTimestamp(3,
-                    new Timestamp(currentDateTime.toDate().getTime()));
-                statement.setTimestamp(4,
-                    new Timestamp(currentDateTime.plusMonths(12).toDate()
-                                                 .getTime()));
-                statement.setTimestamp(5,
-                    new Timestamp(currentDateTime.toDate().getTime()));
-                statement.setTimestamp(6,
-                    new Timestamp(currentDateTime.plusMonths(12).toDate()
-                                                 .getTime()));
-
-                statement.execute();
-                statement.close();
-            }
-
-            tsDataSource.commit();
-            userResponse = new UserResponse();
-
-            if ((currentUserFB.uid != null) &&
-                    "e".equals(currentUser.getCurrentStatus())) {
-                userResponse.setIs_have_account("1");
-            } else {
-                userResponse.setIs_have_account("0");
-            }
-
-            userResponse.setUser(currentUser);
-
-            return userResponse;
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            try {
-                tsDataSource.rollback();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            }
-
-            throw new TasteSyncException("login_fb " + e.getMessage());
-        } catch (JsonParseException e) {
-            e.printStackTrace();
-            throw new TasteSyncException("login_fb " + e.getMessage());
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-            throw new TasteSyncException("login_fb " + e.getMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new TasteSyncException("login_fb " + e.getMessage());
-        } finally {
-            tsDataSource.closeConnection(statement, null);
-        }
-    }
+//    @Override
+//    public UserResponse login(TSDataSource tsDataSource, Connection connection,
+//        String email, String password) throws TasteSyncException {
+//        TSUserObj tsUserObj = null;
+//
+//        PreparedStatement statement = null;
+//        ResultSet resultset = null;
+//        String id = null;
+//        UserResponse userResponse = null;
+//
+//        try {
+//            tsDataSource.begin();
+//            statement = connection.prepareStatement(UserQueries.USER_LOGIN_SELECT_SQL);
+//            statement.setString(1, email);
+//            statement.setString(2, password);
+//            resultset = statement.executeQuery();
+//
+//            if (resultset.next()) {
+//                tsUserObj = new TSUserObj();
+//                MySQL.mapResultsetRowToTSUserVO(tsUserObj, resultset);
+//            }
+//
+//            statement.close();
+//
+//            if (tsUserObj != null) {
+//                statement = connection.prepareStatement(UserQueries.USER_ONLINE_UPDATE_SQL);
+//                statement.setString(1, "Y");
+//                statement.setTimestamp(2,
+//                    CommonFunctionsUtil.getCurrentDateTimestamp());
+//                statement.setString(3, tsUserObj.getUserId());
+//                statement.executeUpdate();
+//                statement.close();
+//
+//                statement = connection.prepareStatement(UserQueries.USER_LOGIN_INSERT_SQL,
+//                        Statement.RETURN_GENERATED_KEYS);
+//                statement.setString(1, tsUserObj.getUserId());
+//
+//                String dateNow = CommonFunctionsUtil.getCurrentDatetime();
+//                statement.setString(2, dateNow);
+//                statement.setString(3, dateNow);
+//                statement.executeUpdate();
+//
+//                resultset = statement.getGeneratedKeys();
+//
+//                int risultato = 0;
+//
+//                if (resultset.next()) {
+//                    risultato = resultset.getInt(1);
+//                }
+//
+//                statement.close();
+//
+//                String auto_id = String.valueOf(risultato);
+//                String dateNowAppend = CommonFunctionsUtil.getCurrentDatetimeAppendField();
+//                id = dateNowAppend + "-" + tsUserObj.getUserId() + "-" +
+//                    risultato;
+//
+//                statement = connection.prepareStatement(UserQueries.USERLOG_LOGID_UPDATE_SQL);
+//                statement.setString(1, id);
+//                statement.setString(2, auto_id);
+//                statement.executeUpdate();
+//                statement.close();
+//
+//                userResponse = new UserResponse();
+//                userResponse.setUser(tsUserObj);
+//                userResponse.setUser_log_id(id);
+//            }
+//
+//            tsDataSource.commit();
+//
+//            return userResponse;
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//
+//            try {
+//                tsDataSource.rollback();
+//            } catch (SQLException e1) {
+//                e1.printStackTrace();
+//            }
+//
+//            throw new TasteSyncException(e.getMessage());
+//        } finally {
+//            tsDataSource.closeConnection(statement, resultset);
+//        }
+//    }
 
     @Override
     public void logout(TSDataSource tsDataSource, Connection connection,
         String userLogId, String userId) throws TasteSyncException {
         TSUserObj user = null;
         MySQL mySQL = new MySQL();
-        String dateNow = CommonFunctionsUtil.getCurrentDatetime();
         PreparedStatement statement = null;
         boolean logoutSuccess = false;
 
@@ -1572,13 +1293,6 @@ public class UserDaoImpl extends BaseDaoImpl implements UserDao {
                 statement.setString(3, userId);
                 statement.executeUpdate();
                 statement.close();
-
-                statement = connection.prepareStatement(UserQueries.USERSLOG_LOGOUT_UPDATE_SQL);
-                statement.setString(1, dateNow);
-                statement.setString(2, userLogId);
-                statement.executeUpdate();
-                statement.close();
-
                 logoutSuccess = true;
             }
 

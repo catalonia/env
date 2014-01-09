@@ -1,6 +1,35 @@
 package com.tastesync.db.queries;
 
 public interface UserQueries extends TSDBCommonQueries {
+    //	USER_FBID_UPDATE_SQL
+    //	USERLOG_EMAIL_SELECT_SQL
+    //	USER_LOGIN_UPDATE_SQL
+    //	USER_LOGOUT_INSERT_SQL
+    //	USER_LOGOUT_UPDATE_SQL
+    //	STORY_INSERT_SQL
+    //	STORY_UPDATE_SQL
+    //	USER_SOCIAL_SETTINGS_SELECT_SQL
+    //	USER_SOCIAL_APID_SETTINGS_SELECT_SQL
+    //	USER_SOCIAL_APID_SETTINGS_UPDATE_SQL
+    //	USER_SOCIAL_AP_SELECT_SQL
+    //	USER_NOTIFICATION_SETTINGS_SELECT_SQL
+    //	USER_NOTIFICATION_SETTINGS_UPDATE_SQL
+    //	ABOUT_TASTESYNC_ELEMENT_ALL_DESCRIPTOR_SELECT_SQL
+    //	USER_PRIVACY_SETTINGS_SELECT_SQL
+    //	USER_PRIVACY_SETTINGS_UPDATE_SQL
+    //	PRIVACY_DESCRIPTOR_ORDER_SELECT_SQL
+    //	USER_SOCIAL_NETWORK_CONNECTION_SELECT_SQL
+    //	USER_FRIEND_TASTESYNC_DELETE_SQL
+    //	USER_FRIEND_TASTESYNC_DATETIME_UPDATE_SQL
+    //	USER_FRIEND_TASTESYNC_DATETIME_DELETE_SQL
+    //	USER_FRIEND_FB_STATUS_UPDATE_SQL
+    //	USER_FRIEND_FB_DELETE_SQL
+    //	USER_FRIEND_FB_SECLECT_SQL
+    //	USER_FRIEND_FB_DELETED_SECLECT_SQL
+    //	USER_FRIEND_FB_DATETIME_DELETE_SQL
+    //	USER_FRIEND_SIGNUP_FB_INSERT_SQL
+    //	USER_DEVICE_SELECT_SQL
+    //	
     //USERS
     public static final String USER_SELECT_SQL = "SELECT " + " users.USER_ID," +
         " users.TS_USER_ID," + " users.TS_USER_EMAIL," + " users.TS_USER_PW," +
@@ -22,36 +51,6 @@ public interface UserQueries extends TSDBCommonQueries {
         " users.USER_CITY_ID," + " users.USER_STATE," + " users.IS_ONLINE," +
         " users.USER_COUNTRY," + " users.ABOUT," + " users.CURRENT_STATUS," +
         " users.USER_FB_ID" + " FROM " + " users ";
-    public static final String USERS_INSERT_SQL = "INSERT INTO users (" +
-        " users.USER_ID, " + "users.TS_USER_ID, " + "users.TS_USER_EMAIL, " +
-        "users.TS_USER_PW, " + "users.TS_FIRST_NAME, " +
-        "users.TS_LAST_NAME, " + "users.MAX_INVITES, " +
-        "users.USER_CREATED_INITIAL_DATETIME, " + "users.USER_POINTS, " +
-        "users.TWITTER_USR_URL, " + "users.USER_DISABLED_FLAG, " +
-        "users.USER_ACTIVATION_KEY, " + "users.USER_GENDER, " +
-        "users.USER_CITY_ID, " + "users.USER_STATE, " + "users.IS_ONLINE, " +
-        "users.USER_COUNTRY, " + "users.ABOUT, " + "users.CURRENT_STATUS, " +
-        "users.USER_FB_ID " + ") VALUES (" + "?," + // users.USER_ID",
-        "?," + // "users.TS_USER_ID",
-        "?," + // "users.TS_USER_EMAIL",
-        "?," + // "users.TS_USER_PW",
-        "?," + // "users.TS_FIRST_NAME",
-        "?," + // "users.TS_LAST_NAME",
-        "?," + // "users.MAX_INVITES",
-        "?," + // "users.USER_CREATED_INITIAL_DATETIME",
-        "?," + // "users.USER_POINTS",
-        "?," + // "users.TWITTER_USR_URL",
-        "?," + // "users.USER_DISABLED_FLAG",
-        "?," + // "users.USER_ACTIVATION_KEY",
-        "?," + // "users.USER_GENDER",
-        "?," + // "users.USER_CITY_ID",
-        "?," + // "users.USER_STATE",
-        "?," + // "users.IS_ONLINE",
-        "?," + // "users.USER_COUNTRY",
-        "?," + // "users.ABOUT",
-        "?," + // "users.CURRENT_STATUS"
-        "?" + // "users.USER_FB_ID",
-        ")";
     public static String USER_LOGIN_SELECT_SQL = "SELECT " + " users.USER_ID," +
         " users.TS_USER_ID," + " users.TS_USER_EMAIL," + " users.TS_USER_PW," +
         " users.TS_FIRST_NAME," + " users.TS_LAST_NAME," +
@@ -65,20 +64,21 @@ public interface UserQueries extends TSDBCommonQueries {
     public static String USER_ONLINE_UPDATE_SQL = "UPDATE users " +
         "SET IS_ONLINE = ? , IS_ONLINE_UPDATED_DATETIME = ? " +
         "WHERE USER_ID = ?";
-    public static String USER_STATUS_SELECT_SQL = "SELECT * FROM users WHERE USER_ID = ? AND CURRENT_STATUS = ?";
-    public static String USER_CHECK_EMAIL_SELECT_SQL = "SELECT * FROM users WHERE TS_USER_EMAIL = ?";
-    public static String USER_CHECK_EMAIL_STATUS_SELECT_SQL = "SELECT users.USER_ID, " +
-        "users.TS_USER_ID, " + "users.TS_USER_EMAIL, " +
-        "users.TS_FIRST_NAME, " + "users.TS_LAST_NAME, " +
-        "users.MAX_INVITES, " + "users.USER_CREATED_INITIAL_DATETIME, " +
-        "users.USER_POINTS, " + "users.TWITTER_USR_URL, " +
-        "users.USER_DISABLED_FLAG, " + "users.USER_ACTIVATION_KEY, " +
-        "users.USER_GENDER, " + "users.USER_CITY_ID, " + "users.USER_STATE, " +
-        "users.IS_ONLINE, " + "users.USER_COUNTRY, " +
-        "users.CURRENT_STATUS, " + "users.ABOUT, " + "users.USER_FB_ID " +
-        "FROM users WHERE TS_USER_EMAIL = ? " +
-        "AND (CURRENT_STATUS = ? OR CURRENT_STATUS = ?)";
-    public static String USER_FBID_SELECT_SQL = "SELECT * FROM users WHERE User_FB_ID = ? AND CURRENT_STATUS = ?";
+    public static String USER_STATUS_SELECT_SQL = "" +
+        "SELECT users.USER_ID, " + "users.TS_USER_ID, " +
+        "users.TS_USER_EMAIL, " + "users.TS_FIRST_NAME, " +
+        "users.TS_LAST_NAME, " + "users.MAX_INVITES, " +
+        "users.USER_CREATED_INITIAL_DATETIME, " + "users.USER_POINTS, " +
+        "users.TWITTER_USR_URL, " + "users.USER_DISABLED_FLAG, " +
+        "users.USER_ACTIVATION_KEY, " + "users.USER_GENDER, " +
+        "users.USER_CITY_ID, " + "users.USER_STATE, " + "users.IS_ONLINE, " +
+        "users.USER_COUNTRY, " + "users.CURRENT_STATUS, " + "users.ABOUT, " +
+        "users.USER_FB_ID " +
+        "FROM users WHERE USER_ID = ? AND CURRENT_STATUS = ?";
+    public static String USER_FBID_SELECT_SQL = "SELECT users.USER_ID, users.TS_USER_ID, users.TS_USER_EMAIL, users.TS_FIRST_NAME,users.TS_LAST_NAME,users.MAX_INVITES," +
+        "users.USER_CREATED_INITIAL_DATETIME, users.USER_POINTS, users.TWITTER_USR_URL, users.USER_DISABLED_FLAG, users.USER_ACTIVATION_KEY, users.USER_GENDER, " +
+        "users.USER_CITY_ID, users.USER_STATE, users.IS_ONLINE, users.USER_COUNTRY, users.ABOUT, users.CURRENT_STATUS, users.USER_FB_ID" +
+        " FROM users WHERE User_FB_ID = ? AND (CURRENT_STATUS = ? OR CURRENT_STATUS = ?)";
     public static String USER_FBID_UPDATE_SQL = "UPDATE users SET USER_FB_ID = ? WHERE USER_ID = ?";
     public static String USERID_SELECT_SQL = "SELECT * FROM facebook_user_data WHERE USER_FB_ID IN (SELECT USER_FB_ID FROM users WHERE USER_ID = ?)";
     public static String USER_FACEBOOK_ID_SELECT_SQL = "SELECT users.USER_ID, " +
@@ -92,57 +92,16 @@ public interface UserQueries extends TSDBCommonQueries {
         "users.CURRENT_STATUS, " + "users.ABOUT, " + "users.USER_FB_ID " +
         " FROM users " + "WHERE USER_ID " +
         "IN (SELECT user_friend_tastesync.FRIEND_ID FROM user_friend_tastesync WHERE USER_ID = ?)";
-
-    // public static String USER_ID_UPDATE_SQL = "UPDATE users SET USER_ID = ?"+ ", TS_USER_ID = ?" +" WHERE Auto_User_ID = ?";
-    public static String USER_FACEBOOK_INSERT_SQL = "INSERT INTO users " +
-        "(TS_USER_EMAIL, " + "USER_CREATED_INITIAL_DATETIME, " +
-        "TS_FIRST_NAME, " + "TS_LAST_NAME, " + "USER_GENDER, " +
-        "USER_CITY_ID, " + /*"USER_CITY, " +*/
-        "USER_STATE, " + "USER_COUNTRY," + " USER_FB_ID," + "USER_ID," +
-        "TS_USER_ID)" + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+//    public static String USER_FACEBOOK_INSERT_SQL = "INSERT INTO users " +
+//        "(TS_USER_EMAIL, " + "USER_CREATED_INITIAL_DATETIME, " +
+//        "TS_FIRST_NAME, " + "TS_LAST_NAME, " + "USER_GENDER, " +
+//        "USER_CITY_ID, " + /*"USER_CITY, " +*/
+//        "USER_STATE, " + "USER_COUNTRY," + " USER_FB_ID," + "USER_ID," +
+//        "TS_USER_ID)" + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     public static String USER_ABOUT_UPDATE_SQL = "UPDATE users SET ABOUT = ? WHERE USER_ID = ?";
 
     //FACEBOOK_USER_DATA
     public static String FACEBOOK_SELECT_SQL = "SELECT * FROM facebook_user_data WHERE User_FB_ID = ?";
-    public static String FACEBOOK_INSERT_SQL = "INSERT INTO facebook_user_data " +
-        "(User_FB_ID, " + "NAME, " + "FIRST_NAME, " + "MIDDLE_NAME, " +
-        "LAST_NAME, " + "GENDER, " + "LOCALE, " + "LINK, " + "USERNAME, " +
-        "AGE_RANGE, " + "BIRTHDAY, " + "THIRD_PARTY_ID, " + "FRIENDLISTS, " +
-        "INSTALLED, " + "TIMEZONE, " + "UPDATE_TIME, " + "VERIFIED, " +
-        "DEVICES, " + "EMAIL, " + "HOMETOWN, " + "LOCATION, " + "PICTURE, " +
-        "RELATIONSHIP_STATUS, " + "CHECKINS, " + "FRIENDS, " + "LIKES, " +
-        "PERMISSIONS, " + "CREATED)" +
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    public static String FACEBOOK_UPDATE_SQL = "UPDATE facebook_user_data SET " +
-        "NAME = ?, " + "FIRST_NAME = ?, " + "MIDDLE_NAME = ?, " +
-        "LAST_NAME = ?, " + "GENDER = ?, " + "LOCALE = ?, " + "LINK = ?, " +
-        "USERNAME = ?, " + "AGE_RANGE = ?, " + "BIRTHDAY = ?, " +
-        "THIRD_PARTY_ID = ?, " + "FRIENDLISTS = ?, " + "INSTALLED = ?, " +
-        "TIMEZONE = ?, " + "UPDATE_TIME = ?, " + "VERIFIED = ?, " +
-        "DEVICES = ?, " + "EMAIL = ?, " + "HOMETOWN = ?, " + "LOCATION = ?, " +
-        "PICTURE = ?, " + "RELATIONSHIP_STATUS = ?, " + "CHECKINS = ?, " +
-        "FRIENDS = ?, " + "LIKES = ?, " + "PERMISSIONS = ?, " + "CREATED = ? " +
-        "WHERE User_FB_ID = ?";
-
-    //USERS_LOG
-    public static String USER_LOGIN_INSERT_SQL = "INSERT INTO users_log (USER_ID, LOGIN_DATETIME, " +
-        "USERS_CREATED_LATEST_DATETIME, LOG_ID) VALUES (?, ?, ?, ?)";
-    public static String USERLOG_EMAIL_SELECT_SQL = "SELECT * FROM users_log WHERE USER_ID = ?";
-    public static String USER_LOGIN_UPDATE_SQL = "UPDATE users_log " +
-        "SET LOGIN_DATETIME = ? " + "WHERE USER_ID = ?";
-    public static String USERSLOG_LOGOUT_UPDATE_SQL = "UPDATE users_log " +
-        "SET LOGOUT_DATETIME = ? " + "WHERE LOG_ID = ?";
-    public static String USER_ID_FROM_USERLOG_SELECT_SQL = "SELECT * FROM users_log WHERE LOG_ID = ?";
-    public static String USER_LOGOUT_INSERT_SQL = "" +
-        "INSERT INTO `users_log` " + " (`users_log`.`log_id`, " +
-        " `users_log`.`login_datetime`, " + " `users_log`.`logout_datetime`, " +
-        " `users_log`.`user_id`, " +
-        " `users_log`.`users_created_latest_datetime`) " + "VALUES ( ?, " +
-        " ?, " + " ?, " + " ?, " + " ? )";
-    public static String USER_LOGOUT_UPDATE_SQL = "UPDATE users_log " +
-        "SET LOGOUT_DATETIME = ? " + "WHERE USER_ID = ?" +
-        " AND LOGOUT_DATETIME IS NULL";
-    public static String USERLOG_LOGID_UPDATE_SQL = "UPDATE users_log SET LOG_ID = ? WHERE Auto_Log_ID = ?";
 
     //STORY
     public static String STORY_INSERT_SQL = "INSERT INTO story (STORY_CREATED_DATETIME, ACTION_ID_TYPE, USER_ID, UPDATED_DATETIME) VALUES (?, ?, ?, ?)";
@@ -252,12 +211,24 @@ public interface UserQueries extends TSDBCommonQueries {
 
     //USER_FRIEND_TASTESYNC
     public static String USER_FRIEND_TASTESYNC_SELECT_SQL = "SELECT * FROM user_friend_tastesync WHERE USER_ID = ?";
-    public static String USER_FRIEND_TASTESYNC_CHECK_SELECT_SQL = "SELECT * FROM user_friend_tastesync WHERE USER_ID = ? AND FRIEND_ID = ?";
-    public static String USER_FRIEND_TASTESYNC_INSERT_SQL = "INSERT INTO user_friend_tastesync(ID, USER_ID, FRIEND_ID, FRIEND_TRUSTED_FLAG, FRIEND_TRUSTED_ADDED_DATETIME) VALUES (?, ?, ?, ?, ?)";
-    public static String USER_FRIEND_TASTESYNC_UPDATE_SQL = "UPDATE user_friend_tastesync SET FRIEND_TRUSTED_FLAG = ? WHERE USER_ID = ? AND FRIEND_ID = ?";
+    public static String COUNT_USER_FRIEND_TASTESYNC_CHECK_SELECT_SQL = "SELECT count(*) FROM user_friend_tastesync WHERE USER_ID = ? AND FRIEND_ID = ?";
+    public static String USER_FRIEND_TASTESYNC_CHECK_SELECT_SQL = "SELECT user_friend_tastesync.FRIEND_TRUSTED_FLAG FROM user_friend_tastesync WHERE USER_ID = ? AND FRIEND_ID = ?";
     public static String USER_FRIEND_TASTESYNC_DELETE_SQL = "DELETE FROM user_friend_tastesync WHERE USER_ID = ?";
     public static String USER_FRIEND_TASTESYNC_DATETIME_UPDATE_SQL = "UPDATE user_friend_tastesync SET FRIEND_TRUSTED_ADDED_DATETIME = ? WHERE USER_ID = ? AND FRIEND_ID = ?";
     public static String USER_FRIEND_TASTESYNC_DATETIME_DELETE_SQL = "DELETE FROM user_friend_tastesync WHERE USER_ID = ? AND FRIEND_TRUSTED_ADDED_DATETIME != ?";
+    public static String USER_FRIEND_TASTESYNC_TRUST_UPDATE_SQL = "" +
+        "UPDATE USER_FRIEND_TASTESYNC " +
+        "SET    USER_FRIEND_TASTESYNC.FRIEND_TRUSTED_FLAG = ?, " +
+        "       USER_FRIEND_TASTESYNC.FRIEND_TRUSTED_ADDED_DATETIME = ? " +
+        "WHERE  USER_FRIEND_TASTESYNC.USER_ID = ? " +
+        "       AND USER_FRIEND_TASTESYNC.FRIEND_ID = ?";
+    public static String USER_FRIEND_TASTESYNC_TRUST_INSERT_UPDATE_SQL = "" +
+        "INSERT INTO USER_FRIEND_TASTESYNC " +
+        "            (USER_FRIEND_TASTESYNC.FRIEND_ID, " +
+        "             USER_FRIEND_TASTESYNC.USER_ID) " + "VALUES      ( ?, " +
+        "              ? ) " + "ON DUPLICATE KEY UPDATE " +
+        "USER_FRIEND_TASTESYNC.FRIEND_ID = USER_FRIEND_TASTESYNC.FRIEND_ID, " +
+        "USER_FRIEND_TASTESYNC.USER_ID = USER_FRIEND_TASTESYNC.USER_ID";
 
     //USER_MESSAGE
     public static String USER_MESSAGE_INSERT_SQL = "INSERT INTO user_message(MESSAGE_ID, SENDER_ID, RECIPIENT_ID, CONTENT, CREATED) VALUES (?, ?, ?, ?, ?)";
@@ -275,6 +246,12 @@ public interface UserQueries extends TSDBCommonQueries {
     public static String USERS_CURRENT_STATUS_UPDATE_SQL = "" +
         "UPDATE USERS " + "SET    USERS.CURRENT_STATUS = ? " +
         "WHERE  USERS.USER_ID = ? ";
+    public static String USER_NOTIF_WELCOME_MESSAGE_INSERT_SQL = "" +
+        "INSERT INTO USER_NOTIF_WELCOME_MESSAGE " +
+        "            (USER_NOTIF_WELCOME_MESSAGE.USER_ID, " +
+        "             USER_NOTIF_WELCOME_MESSAGE.CREATED) " +
+        "VALUES      ( ?, " + "              ? " + ") " +
+        "ON DUPLICATE KEY UPDATE USER_NOTIF_WELCOME_MESSAGE.USER_ID = USER_NOTIF_WELCOME_MESSAGE.USER_ID";
 
     //USER_FRIEND_FB
     public static String USER_FRIEND_SIGNUP_FB_UPDATE_SQL = "UPDATE user_friend_fb SET INVITATION_SENT_YN = ? WHERE USER_ID = ? AND USER_FRIEND_FB = ?";
@@ -381,8 +358,15 @@ public interface UserQueries extends TSDBCommonQueries {
         "FROM `user_friend_fb` " + "WHERE USER_ID=? AND USER_FRIEND_FB=?";
 
     //TODO USER_DEVICE
-    public static String USER_DEVICE_INSERT_SQL = "INSERT INTO `user_device`(`USER_ID`, `device_token`, `updated_datetime`, `expiration_datetime`)" +
-        "VALUES (?,?,?,?)";
+    public static String USER_DEVICE_INSERT_SQL = "" +
+        "INSERT INTO USER_DEVICE " + "            (USER_DEVICE.USER_ID, " +
+        "             USER_DEVICE.DEVICE_TOKEN, " +
+        "             USER_DEVICE.UPDATED_DATETIME, " +
+        "             USER_DEVICE.EXPIRATION_DATETIME) " + "VALUES      ( ?, " +
+        "              ?, " + "              ?, " + "              ? ) " +
+        "ON DUPLICATE KEY UPDATE " + "USER_DEVICE.UPDATED_DATETIME = ?,  " +
+        "USER_DEVICE.EXPIRATION_DATETIME = ?, " +
+        "USER_DEVICE.USER_ID = ? ";
     public static String USER_DEVICE_SELECT_SQL = "SELECT * FROM `user_device` " +
         "WHERE USER_ID=?";
     public static String INIT_USER_USNC_INSERT_SQL = "" +
@@ -412,4 +396,26 @@ public interface UserQueries extends TSDBCommonQueries {
         " USER_PRIVACY_SETTINGS.USER_ID) " + "VALUES ( ?, " + " ?, " + " ? ) " +
         "ON DUPLICATE KEY UPDATE " +
         "USER_PRIVACY_SETTINGS.PRIVACY_FLAG = USER_PRIVACY_SETTINGS.PRIVACY_FLAG";
+    public static String USER_FB_ACCESS_INSERT_SQL = "" +
+        "INSERT INTO USER_FB_ACCESS " +
+        "            (USER_FB_ACCESS.FB_ACCESS_TOKEN, " +
+        "             USER_FB_ACCESS.FB_ACCESS_TOKEN_CREATED, " +
+        "             USER_FB_ACCESS.FB_ACCESS_TOKEN_ID, " +
+        "             USER_FB_ACCESS.FB_INFO_STATUS, " +
+        "             USER_FB_ACCESS.FB_INFO_UPDATED_DATETIME, " +
+        "             USER_FB_ACCESS.USER_FB_ID, " +
+        "             USER_FB_ACCESS.USER_ID, " +
+        "             USER_FB_ACCESS.VENDOR_IDENTIFIER) " +
+        "VALUES      ( ?, " + "              ?, " + "              ?, " +
+        "              ?, " + "              ?, " + "              ?, " +
+        "              ?, " + "              ? ) " +
+        "ON DUPLICATE KEY UPDATE " +
+        "USER_FB_ACCESS.FB_INFO_UPDATED_DATETIME = ?, " +
+        "USER_FB_ACCESS.VENDOR_IDENTIFIER = ?";
+    public static String CITY_STATE_SELECT_SQL = "" + "SELECT CITIES.CITY_ID " +
+        "FROM   CITIES, " + "       STATE_NAME " +
+        "WHERE  CITIES.STATE = STATE_NAME.STATE_ID " +
+        "       AND STATE_NAME.STATE_NAME = ? " +
+        "       AND REPLACE(REPLACE(Lower(CITIES.CITY), ' ', ''), '.', '') = REPLACE( " +
+        "           REPLACE(Lower(?), ' ', ''), '.', '')";
 }

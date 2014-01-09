@@ -2768,6 +2768,7 @@ public class AskReplyDAOImpl extends BaseDaoImpl implements AskReplyDAO {
                     processTSNotifDidYouLikeObj(connection,
                         tsRecoNotificationBaseObjElement,
                         recoNotificationBaseList, userId);
+                //}
                 } else if (TSConstants.RECONOTIFICATION_TYPE_WELCOME_MSG.equals(
                             tsRecoNotificationBaseObjElement.getRecoNotificationType())) {
                     processTSNotifWelcomeMessageForYouObj(connection,

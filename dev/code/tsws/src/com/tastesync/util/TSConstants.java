@@ -28,7 +28,7 @@ public interface TSConstants {
     public static final String RECONOTIFICATION_WELCOME_MSG_TXT = RECONOTIFICATION_WELCOME_MSG_TXT_1 +
         RECONOTIFICATION_WELCOME_MSG_TXT_2 +
         RECONOTIFICATION_WELCOME_MSG_TXT_3;
-    public static final int PAGINATION_GAP = 10;
+    public static final int PAGINATION_GAP = 50;
     public static final String SEND_PUSH_NOTIFICATIONS_SCRIPT = "./pushnotification/SendPushNotificationsInstant.sh";
     public static final String BASENAME_SEND_PUSH_NOTIFICATIONS_SCRIPT = "SendPushNotificationsInstant";
     public static final String TRIGGER_ALGO1_SCRIPT = "./algo/TriggerAlgo1.sh";

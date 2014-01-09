@@ -26,6 +26,7 @@ import com.tastesync.model.vo.RestaurantBuzzVO;
 
 import com.tastesync.util.TSConstants;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -447,13 +448,34 @@ public class RestaurantDAOImpl extends BaseDaoImpl implements RestaurantDAO {
 
         return null;
     }
-
+	private String modifyPhoneNumber(String phoneNumber)
+	{
+		if (phoneNumber == null || phoneNumber.isEmpty()) {
+			return "";
+		}
+	    phoneNumber = StringUtils.replace(phoneNumber, "(", "");
+	    phoneNumber = StringUtils.replace(phoneNumber, ")", "");
+	    phoneNumber = StringUtils.replace(phoneNumber, "-", "");
+	    phoneNumber = StringUtils.replace(phoneNumber, " ", "");
+	    String countryCode="";
+	    if (phoneNumber.length() >= 2) {
+	    	countryCode=phoneNumber.substring(0, 2);
+	    	System.out.println("countryCode="+countryCode);
+	    }
+	    if (!"+1".equals(countryCode)) {
+		    phoneNumber = "+1"+phoneNumber;
+	    }
+	    return phoneNumber;
+	}
     //TODO
     private void mapResultsetRowToTSRestaurantExtendInfoVO(
         TSRestaurantExtendInfoObj tsRestaurantExtendInfoObj, ResultSet resultset)
         throws SQLException {
-        tsRestaurantExtendInfoObj.setPhoneNumber(CommonFunctionsUtil.getModifiedValueString(
-                resultset.getString("restaurant_extended_info.tel")));
+        String phoneNumber = CommonFunctionsUtil.getModifiedValueString(
+                resultset.getString("restaurant_extended_info.tel"));
+    	tsRestaurantExtendInfoObj.setPhoneNumber(phoneNumber);
+    	//modify phone number
+    	tsRestaurantExtendInfoObj.setCallPhoneNumber(modifyPhoneNumber(phoneNumber));
         tsRestaurantExtendInfoObj.setWebsite(CommonFunctionsUtil.getModifiedValueString(
                 resultset.getString("restaurant_extended_info.website")));
         tsRestaurantExtendInfoObj.setHealthyOptionsFlag(CommonFunctionsUtil.getModifiedValueString(

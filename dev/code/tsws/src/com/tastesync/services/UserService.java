@@ -295,8 +295,7 @@ public class UserService extends BaseService {
                     return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
-                if ((oauthDataExtInfoVO == null) ||
-                        (oauthDataExtInfoVO.getOauthDataVO() == null)) {
+                if ((oauthDataExtInfoVO.getOauthDataVO() == null)) {
                     return notAuthorised(oauthDataExtInfoVO);
                 } // end if
 
@@ -594,7 +593,7 @@ public class UserService extends BaseService {
     })
     @Produces({MediaType.APPLICATION_JSON
     })
-    public Response loginAccount(@Context
+    private Response loginAccount(@Context
     HttpHeaders headers, @FormParam("userId")
     String userId) {
         super.processHttpHeaders(headers);
@@ -630,22 +629,13 @@ public class UserService extends BaseService {
                 userId = oauthUserId;
             } // end if
 
-            String result = userBo.loginAccount(tsDataSource, connection, userId);
+            //String result = userBo.loginAccount(tsDataSource, connection, userId);
+            String result="";
+            TSSuccessObj tsSuccessObj = new TSSuccessObj();
+            tsSuccessObj.setSuccessMsg(result);
 
-            if (result != null) {
-                TSSuccessObj tsSuccessObj = new TSSuccessObj();
-                tsSuccessObj.setSuccessMsg(result);
-
-                return Response.status(TSResponseStatusCode.SUCCESS.getValue())
-                               .entity(tsSuccessObj).build();
-            } // end if
-            else {
-                TSErrorObj tsErrorObj = new TSErrorObj();
-                tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-
-                return Response.status(TSResponseStatusCode.ERROR.getValue())
-                               .entity(tsErrorObj).build();
-            } // end else
+            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+                           .entity(tsSuccessObj).build();
         } // end try
         catch (TasteSyncException e) {
             logger.error(e);
@@ -1241,7 +1231,7 @@ public class UserService extends BaseService {
 
                 OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
-                        headerDataVO.getInputOauthToken());
+                        headerDataVO.getInputOauthToken(), true);
 
                 if ((oauthDataExtInfoVO == null) ||
                         (oauthDataExtInfoVO.getOauthDataVO() == null)) {
@@ -1250,7 +1240,7 @@ public class UserService extends BaseService {
 
                 oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
 
-                userId = oauthUserId;
+                //userId = oauthUserId;
             } // end if
 
             List<TSUserObj> tsFacebookUserDataObjList = userBo.showProfileFriends(tsDataSource,
@@ -2159,63 +2149,63 @@ public class UserService extends BaseService {
         } // end finally
     } // end submitFollowUserStatusChange()
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param headers DOCUMENT ME!
-     * @param email DOCUMENT ME!
-     * @param password DOCUMENT ME!
-     *
-     * @return DOCUMENT ME!
-     */
-    @POST
-    @Path("/login")
-    @org.codehaus.enunciate.jaxrs.TypeHint(UserResponse.class)
-    @Consumes({MediaType.APPLICATION_FORM_URLENCODED
-    })
-    @Produces({MediaType.APPLICATION_JSON
-    })
-    public Response submitLogin(@Context
-    HttpHeaders headers, @FormParam("email")
-    String email, @FormParam("password")
-    String password) {
-        super.processHttpHeaders(headers);
-
-        UserResponse userResponse = null;
-
-        TSDataSource tsDataSource = TSDataSource.getInstance();
-        Connection connection = null;
-
-        try {
-            connection = tsDataSource.getConnection();
-            userResponse = userBo.login(tsDataSource, connection, email,
-                    password);
-
-            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
-                           .entity(userResponse).build();
-        } // end try
-        catch (TasteSyncException e) {
-            logger.error(e);
-
-            TSErrorObj tsErrorObj = new TSErrorObj();
-            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-
-            return Response.status(TSResponseStatusCode.ERROR.getValue())
-                           .entity(tsErrorObj).build();
-        } // end catch
-        catch (SQLException e) {
-            logger.error(e);
-
-            TSErrorObj tsErrorObj = new TSErrorObj();
-            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
-
-            return Response.status(TSResponseStatusCode.ERROR.getValue())
-                           .entity(tsErrorObj).build();
-        } // end catch
-        finally {
-            tsDataSource.closeConnection(connection);
-        } // end finally
-    } // end submitLogin()
+//    /**
+//     * DOCUMENT ME!
+//     *
+//     * @param headers DOCUMENT ME!
+//     * @param email DOCUMENT ME!
+//     * @param password DOCUMENT ME!
+//     *
+//     * @return DOCUMENT ME!
+//     */
+//    @POST
+//    @Path("/login")
+//    @org.codehaus.enunciate.jaxrs.TypeHint(UserResponse.class)
+//    @Consumes({MediaType.APPLICATION_FORM_URLENCODED
+//    })
+//    @Produces({MediaType.APPLICATION_JSON
+//    })
+//    private Response submitLogin(@Context
+//    HttpHeaders headers, @FormParam("email")
+//    String email, @FormParam("password")
+//    String password) {
+//        super.processHttpHeaders(headers);
+//
+//        UserResponse userResponse = null;
+//
+//        TSDataSource tsDataSource = TSDataSource.getInstance();
+//        Connection connection = null;
+//
+//        try {
+//            connection = tsDataSource.getConnection();
+//            userResponse = userBo.login(tsDataSource, connection, email,
+//                    password);
+//
+//            return Response.status(TSResponseStatusCode.SUCCESS.getValue())
+//                           .entity(userResponse).build();
+//        } // end try
+//        catch (TasteSyncException e) {
+//            logger.error(e);
+//
+//            TSErrorObj tsErrorObj = new TSErrorObj();
+//            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+//
+//            return Response.status(TSResponseStatusCode.ERROR.getValue())
+//                           .entity(tsErrorObj).build();
+//        } // end catch
+//        catch (SQLException e) {
+//            logger.error(e);
+//
+//            TSErrorObj tsErrorObj = new TSErrorObj();
+//            tsErrorObj.setErrorMsg(TSConstants.ERROR_USER_SYSTEM_KEY);
+//
+//            return Response.status(TSResponseStatusCode.ERROR.getValue())
+//                           .entity(tsErrorObj).build();
+//        } // end catch
+//        finally {
+//            tsDataSource.closeConnection(connection);
+//        } // end finally
+//    } // end submitLogin()
 
     /**
      * DOCUMENT ME!
@@ -2274,9 +2264,6 @@ public class UserService extends BaseService {
                                .entity(tsErrorObj).build();
             }
 
-            super.processUserAndFriendDataBasedonFbSingleAccessToken(tsDataSource,
-                connection, accessToken);
-
             //Get from the header
             String identifierForVendor = null;
 
@@ -2285,14 +2272,17 @@ public class UserService extends BaseService {
                         "identifierForVendor").get(0);
             } // end if
 
-            userResponse = userBo.login_fb(tsDataSource, connection,
-                    list_user_profile, identifierForVendor);
+            userResponse = super.getTsUserAfterProcessingUserAndFriendDataBasedonFbSingleAccessToken(tsDataSource,
+                    connection, accessToken, identifierForVendor);
 
             if ((userResponse == null) || (userResponse.getUser() == null)) {
                 return notAuthorised();
             }
 
             String userId = userResponse.getUser().getUserId();
+
+            userBo.addUserDevices(tsDataSource, connection, list_user_profile,
+                userId);
 
             //Get from the header
             String deviceType = null;
@@ -2367,17 +2357,8 @@ public class UserService extends BaseService {
             userLogId = CommonFunctionsUtil.converStringAsNullIfNeeded(userLogId);
 
             connection = tsDataSource.getConnection();
-
-            //check logid is associated with the same userId
-            String userId = userBo.getAutoUserLogByUserId(tsDataSource,
-                    connection, userLogId);
-
-            if (userId == null) {
-                return notAuthorised();
-            } // end if
-
             String oauthUserId = null;
-
+            String userId = null;
             if (TSConstants.OAUTH_SWTICHED_ON) {
                 HeaderDataVO headerDataVO = headerOauthDataChecks(headers);
 
@@ -2395,11 +2376,7 @@ public class UserService extends BaseService {
                 } // end if
 
                 oauthUserId = oauthDataExtInfoVO.getOauthDataVO().getUserId();
-
-                if (!oauthUserId.equals(userId)) {
-                    return notAuthorised();
-                } // end if
-
+                userId=oauthUserId;
                 deleteOAuthToken(tsDataSource, connection,
                     headerDataVO.getIdentifierForVendor());
             } // end if
@@ -2684,7 +2661,7 @@ public class UserService extends BaseService {
 
                 OAuthDataExtInfoVO oauthDataExtInfoVO = getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
                         connection, headerDataVO.getIdentifierForVendor(),
-                        headerDataVO.getInputOauthToken());
+                        headerDataVO.getInputOauthToken(), true);
 
                 if ((oauthDataExtInfoVO == null) ||
                         (oauthDataExtInfoVO.getOauthDataVO() == null)) {

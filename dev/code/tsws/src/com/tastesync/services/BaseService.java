@@ -5,8 +5,11 @@ import com.tastesync.db.pool.TSDataSource;
 import com.tastesync.exception.TasteSyncException;
 
 import com.tastesync.fb.process.TsFacebookRestFb;
+import com.tastesync.fb.vo.TsUser;
 
 import com.tastesync.model.objects.TSErrorObj;
+import com.tastesync.model.objects.TSUserObj;
+import com.tastesync.model.response.UserResponse;
 import com.tastesync.model.vo.HeaderDataVO;
 
 import com.tastesync.oauth.bos.OAuthBO;
@@ -76,7 +79,7 @@ public abstract class BaseService {
     /**
      * DOCUMENT ME!
      */
-    public boolean printDebugExtra = true;
+    public boolean printDebugExtra = false;
 
     /**
      * DOCUMENT ME!
@@ -100,6 +103,86 @@ public abstract class BaseService {
         } // end catch
     } // end deleteOAuthToken()
 
+    public UserResponse getTsUserAfterProcessingUserAndFriendDataBasedonFbSingleAccessToken(
+        TSDataSource tsDataSource, Connection connection, String accessToken,
+        String identifierForVendor) throws TasteSyncException {
+        if (accessToken != null) {
+            TsFacebookRestFb tsFacebookRestFb = new TsFacebookRestFb();
+
+            try {
+                TsUser tsUser = tsFacebookRestFb.getTsUserAfterProcessingUserAndFriendDataBasedonFbSingleAccessToken(tsDataSource,
+                        connection, accessToken, identifierForVendor);
+
+                return getTsUserByMappingTsUserFBToTsUserObj(tsUser);
+
+                //mapped tsUser
+            } catch (com.tastesync.fb.exception.TasteSyncException e) {
+                e.printStackTrace();
+                throw new TasteSyncException(e.getMessage());
+            }
+        } else {
+            logger.info(
+                "accessToken is null. Nothing to be done as part of getTsUserAfterProcessingUserAndFriendDataBasedonFbSingleAccessToken. ");
+            throw new TasteSyncException(
+                "accessToken is null. Nothing to be done as part of getTsUserAfterProcessingUserAndFriendDataBasedonFbSingleAccessToken.");
+        }
+    }
+
+    private UserResponse getTsUserByMappingTsUserFBToTsUserObj(TsUser tsUser) {
+        TSUserObj tsUserObj = new TSUserObj();
+
+        tsUserObj.setAbout(tsUser.getAbout());
+
+        tsUserObj.setCurrentStatus(tsUser.getCurrentStatus());
+
+        tsUserObj.setIsOnline(tsUser.getIsOnline());
+
+        tsUserObj.setMaxInvites(tsUser.getMaxInvites());
+
+        tsUserObj.setPhoto(tsUser.getPhoto());
+
+        tsUserObj.setTsFirstName(tsUser.getTsFirstName());
+
+        tsUserObj.setTsLastName(tsUser.getTsLastName());
+
+        tsUserObj.setTsUserEmail(tsUser.getTsUserEmail());
+
+        tsUserObj.setTsUserId(tsUser.getTsUserId());
+
+        tsUserObj.setTwitterUsrUrl(tsUser.getTwitterUsrUrl());
+
+        tsUserObj.setUserActivationKey(tsUser.getUserActivationKey());
+
+        tsUserObj.setUserCityId(tsUser.getUserCityId());
+
+        tsUserObj.setUserCountry(tsUser.getUserCountry());
+
+        tsUserObj.setUserCreatedInitialDatetime(tsUser.getUserCreatedInitialDatetime());
+
+        tsUserObj.setUserDisabledFlag(tsUser.getUserDisabledFlag());
+
+        tsUserObj.setUserFbId(tsUser.getUserFbId());
+
+        tsUserObj.setUserGender(tsUser.getUserGender());
+
+        tsUserObj.setUserId(tsUser.getUserId());
+
+        tsUserObj.setUserPoints(tsUser.getUserPoints());
+
+        tsUserObj.setUserState(tsUser.getUserState());
+
+        UserResponse userResponse = new UserResponse();
+
+        if ("e".equals(tsUserObj.getCurrentStatus())) {
+            userResponse.setIs_have_account("1");
+        } else {
+            userResponse.setIs_have_account("0");
+        }
+
+        userResponse.setUser(tsUserObj);
+        return userResponse;
+    }
+
     /**
      * DOCUMENT ME!
      *
@@ -118,7 +201,34 @@ public abstract class BaseService {
         throws TasteSyncException {
         try {
             return oauthBO.getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
-                connection, identifierForVendor, inputOauthToken);
+                connection, identifierForVendor, inputOauthToken, false);
+        } // end try
+        catch (com.tastesync.oauth.exception.TasteSyncException e) {
+            logger.error(e);
+            throw new TasteSyncException(e.getMessage());
+        } // end catch
+    } // end getUserOAuthDataFrmDBBasedOnFromOAuthToken()
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param tsDataSource DOCUMENT ME!
+     * @param connection DOCUMENT ME!
+     * @param identifierForVendor DOCUMENT ME!
+     * @param inputOauthToken DOCUMENT ME!
+     * @param skipProfileCheck skip profile check
+     * @return DOCUMENT ME!
+     *
+     * @throws TasteSyncException DOCUMENT ME!
+     */
+    public OAuthDataExtInfoVO getUserOAuthDataFrmDBBasedOnFromOAuthToken(
+        TSDataSource tsDataSource, Connection connection,
+        String identifierForVendor, String inputOauthToken,
+        boolean skipProfileCheck) throws TasteSyncException {
+        try {
+            return oauthBO.getUserOAuthDataFrmDBBasedOnFromOAuthToken(tsDataSource,
+                connection, identifierForVendor, inputOauthToken,
+                skipProfileCheck);
         } // end try
         catch (com.tastesync.oauth.exception.TasteSyncException e) {
             logger.error(e);
@@ -280,25 +390,6 @@ public abstract class BaseService {
         //validate , version check
         writeResponseheader(headers);
     } // end processHttpHeaders()
-
-    public void processUserAndFriendDataBasedonFbSingleAccessToken(
-        TSDataSource tsDataSource, Connection connection, String accessToken)
-        throws TasteSyncException {
-        if (accessToken != null) {
-            TsFacebookRestFb tsFacebookRestFb = new TsFacebookRestFb();
-
-            try {
-                tsFacebookRestFb.processUserAndFriendDataBasedonFbSingleAccessToken(tsDataSource,
-                    connection, accessToken);
-            } catch (com.tastesync.fb.exception.TasteSyncException e) {
-                e.printStackTrace();
-                throw new TasteSyncException(e.getMessage());
-            }
-        } else {
-            logger.info(
-                "accessToken is null. Nothing to be done as part of processUserAndFriendDataBasedonFbSingleAccessToken. ");
-        }
-    }
 
     /**
      * DOCUMENT ME!
