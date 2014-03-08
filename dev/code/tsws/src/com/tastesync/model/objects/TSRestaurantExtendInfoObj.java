@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class TSRestaurantExtendInfoObj implements Serializable {
     private static final long serialVersionUID = 6933222467768293971L;
     private String phoneNumber;
+    private String callPhoneNumber;
     private String website;
     private String healthyOptionsFlag;
     private String wifiFlag;
@@ -56,6 +57,11 @@ public class TSRestaurantExtendInfoObj implements Serializable {
         return phoneNumber;
     }
 
+    @XmlElement
+    public String getCallPhoneNumber() {
+        return callPhoneNumber;
+    }
+    
     @XmlElement
     public String getWebsite() {
         return website;
@@ -262,6 +268,10 @@ public class TSRestaurantExtendInfoObj implements Serializable {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public void setCallPhoneNumber(String callPhoneNumber) {
+        this.callPhoneNumber = callPhoneNumber;
     }
 
     public void setWebsite(String website) {

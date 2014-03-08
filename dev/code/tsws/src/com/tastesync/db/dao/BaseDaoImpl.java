@@ -19,7 +19,6 @@ import java.sql.SQLException;
 public abstract class BaseDaoImpl {
     protected Logger logger = Logger.getLogger(getClass());
 
-    //private static boolean printDebugExtra = false;
     public TSRestaurantsTileSearchObj getRestaurantTileSearchReslt(
         Connection connection, String restaurantId) throws TasteSyncException {
         PreparedStatement statement = null;

@@ -26,12 +26,19 @@ import java.util.List;
 
 
 public interface UserDao {
+    void addUserDevices(TSDataSource tsDataSource, Connection connection,
+        TSListFacebookUserDataObj tsListFacebookUserDataObj, String userID)
+        throws TasteSyncException;
+
     void followUserStatusChange(TSDataSource tsDataSource,
         Connection connection, String followeeUserId, String followerUserId,
         String statusFlag) throws TasteSyncException;
 
     TSInitObj getAllData(TSDataSource tsDataSource, Connection connection)
         throws TasteSyncException;
+
+//    String getAutoUserLogByUserId(TSDataSource tsDataSource,
+//        Connection connection, String userLogId) throws TasteSyncException;
 
     List<TSGlobalObj> getCity(TSDataSource tsDataSource, Connection connection,
         String key) throws TasteSyncException;
@@ -58,20 +65,15 @@ public interface UserDao {
     void inviteFriend(TSDataSource tsDataSource, Connection connection,
         String userId, String friendFBId) throws TasteSyncException;
 
-    UserResponse login(TSDataSource tsDataSource, Connection connection,
-        String email, String password) throws TasteSyncException;
-
-    String loginAccount(TSDataSource tsDataSource, Connection connection,
-        String userId) throws TasteSyncException;
-
-    UserResponse login_fb(TSDataSource tsDataSource, Connection connection,
-        TSListFacebookUserDataObj tsListFacebookUserDataObj, String identifierForVendor) throws TasteSyncException;
+//    UserResponse login(TSDataSource tsDataSource, Connection connection,
+//        String email, String password) throws TasteSyncException;
+//
+//    String loginAccount(TSDataSource tsDataSource, Connection connection,
+//        String userId) throws TasteSyncException;
 
     void logout(TSDataSource tsDataSource, Connection connection,
         String userLogId, String UserId) throws TasteSyncException;
 
-    String getAutoUserLogByUserId(TSDataSource tsDataSource, Connection connection, String userLogId) throws TasteSyncException;
-    
     TSUserObj selectUser(TSDataSource tsDataSource, Connection connection,
         String userId) throws TasteSyncException;
 

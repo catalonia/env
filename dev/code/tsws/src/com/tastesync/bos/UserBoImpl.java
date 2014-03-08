@@ -31,6 +31,15 @@ public class UserBoImpl implements UserBo {
     private UserDao userDao = new UserDaoImpl();
 
     @Override
+    public void addUserDevices(TSDataSource tsDataSource,
+        Connection connection,
+        TSListFacebookUserDataObj tsListFacebookUserDataObj, String userID)
+        throws TasteSyncException {
+        userDao.addUserDevices(tsDataSource, connection,
+            tsListFacebookUserDataObj, userID);
+    }
+
+    @Override
     public void followUserStatusChange(TSDataSource tsDataSource,
         Connection connection, String followeeUserId, String followerUserId,
         String statusFlag) throws TasteSyncException {
@@ -43,6 +52,13 @@ public class UserBoImpl implements UserBo {
         throws TasteSyncException {
         return userDao.getAllData(tsDataSource, connection);
     }
+
+//    @Override
+//    public String getAutoUserLogByUserId(TSDataSource tsDataSource,
+//        Connection connection, String userLogId) throws TasteSyncException {
+//        return userDao.getAutoUserLogByUserId(tsDataSource, connection,
+//            userLogId);
+//    }
 
     @Override
     public List<TSGlobalObj> getCity(TSDataSource tsDataSource,
@@ -96,25 +112,17 @@ public class UserBoImpl implements UserBo {
         userDao.inviteFriend(tsDataSource, connection, userId, friendFBId);
     }
 
-    @Override
-    public UserResponse login(TSDataSource tsDataSource, Connection connection,
-        String email, String password) throws TasteSyncException {
-        return userDao.login(tsDataSource, connection, email, password);
-    }
-
-    @Override
-    public String loginAccount(TSDataSource tsDataSource,
-        Connection connection, String userId) throws TasteSyncException {
-        return userDao.loginAccount(tsDataSource, connection, userId);
-    }
-
-    @Override
-    public UserResponse login_fb(TSDataSource tsDataSource,
-        Connection connection, TSListFacebookUserDataObj tsListFacebookUserDataObj, 
-        String identifierForVendor)
-        throws TasteSyncException {
-        return userDao.login_fb(tsDataSource, connection, tsListFacebookUserDataObj, identifierForVendor);
-    }
+//    @Override
+//    public UserResponse login(TSDataSource tsDataSource, Connection connection,
+//        String email, String password) throws TasteSyncException {
+//        return userDao.login(tsDataSource, connection, email, password);
+//    }
+//
+//    @Override
+//    public String loginAccount(TSDataSource tsDataSource,
+//        Connection connection, String userId) throws TasteSyncException {
+//        return userDao.loginAccount(tsDataSource, connection, userId);
+//    }
 
     @Override
     public void logout(TSDataSource tsDataSource, Connection connection,
@@ -122,13 +130,6 @@ public class UserBoImpl implements UserBo {
         userDao.logout(tsDataSource, connection, userLogId, userId);
     }
 
-
-	@Override
-	public String getAutoUserLogByUserId(TSDataSource tsDataSource,
-			Connection connection, String userLogId) throws TasteSyncException {
-		return userDao.getAutoUserLogByUserId(tsDataSource, connection, userLogId);
-	}
-	
     @Override
     public TSUserObj selectUser(TSDataSource tsDataSource,
         Connection connection, String userId) throws TasteSyncException {
@@ -222,7 +223,7 @@ public class UserBoImpl implements UserBo {
         Connection connection, String userId, String destUserId)
         throws TasteSyncException {
         return userDao.showTrustedFriend(tsDataSource, connection, userId,
-        		destUserId);
+            destUserId);
     }
 
     @Override

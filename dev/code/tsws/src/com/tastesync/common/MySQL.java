@@ -586,39 +586,6 @@ public class MySQL {
         }
     }
 
-    //not used!!
-    public String getUserIDFromUserLogID(Connection connection, String userLogID)
-        throws SQLException {
-        PreparedStatement statement = null;
-
-        try {
-            statement = connection.prepareStatement(UserQueries.USER_ID_FROM_USERLOG_SELECT_SQL);
-            statement.setString(1, userLogID);
-
-            ResultSet resultset = statement.executeQuery();
-
-            if (resultset.next()) {
-                return CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                        "users_log.USER_ID"));
-            }
-
-            statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return null;
-    }
-
     //Get user information (by user_id)
     public TSUserObj getUserInformation(Connection connection, String user_id)
         throws SQLException {
